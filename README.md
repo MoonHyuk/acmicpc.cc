@@ -1,1 +1,1 @@
-# BOJ-statistics
+# acmicpc.cc
