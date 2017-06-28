@@ -1,2 +1,2 @@
-static/
-templates/
+static/* linguist-vendored
+templates/* linguist-vendored
