@@ -1,1 +1,15 @@
 {% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <form class="col s6 offset-s2">
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">account_circle</i>
+          <input type="text" id="autocomplete-input" class="autocomplete">
+          <label for="autocomplete-input">사용자 아이디</label>
+        </div>
+      </div>
+    </form>
+</div>
+{% endblock %}
