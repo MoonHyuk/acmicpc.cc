@@ -100,5 +100,10 @@ ENV/
 
 .idea/
 
-# config file
-config.py
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# migration files
+/migrations
