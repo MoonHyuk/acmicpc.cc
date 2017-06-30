@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 
+{% block css %}
+    <link href="{{ url_for('static', filename = 'index.css') }}" rel="stylesheet">
+{% endblock %}
 {% block content %}
-<div class="row">
-    <form class="col s6 offset-s2">
+<div class="row main center-align">
+    <form class="col s6 offset-s3" action="/" method="get">
       <div class="row">
         <div class="input-field col s12">
           <i class="material-icons prefix">account_circle</i>
@@ -10,6 +13,7 @@
           <label for="autocomplete-input">사용자 아이디</label>
         </div>
       </div>
+        <button class="btn-large waves-effect waves-light pink lighten-2" type="submit">전적 검색하기</button>
     </form>
 </div>
 {% endblock %}
