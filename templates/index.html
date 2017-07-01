@@ -3,14 +3,36 @@
 {% block css %}
     <link href="{{ url_for('static', filename = 'index.css') }}" rel="stylesheet">
 {% endblock %}
+
+{% block js %}
+    <script>
+      $(function() {
+          $('input.autocomplete').autocomplete({
+              data: {
+                  "example": null,
+                  "example2": null,
+                  "example3": null,
+                  "example4": null,
+                  "example5": null
+              },
+              limit: 5,
+              minLength: 1
+          });
+      })
+    </script>
+{% endblock %}
+
 {% block content %}
     <div class="row main center-align">
-        <form class="offset-s2 offset-m3 col s8 m6" action="/" method="get">
+        <form class="offset-s2 offset-m3 col s8 m6" action="/user" method="get" autocomplete="off">
             <div class="row">
                 <div class="input-field col s12">
                     <i class="material-icons prefix">account_circle</i>
-                    <input type="text" id="autocomplete-input" class="autocomplete" name="id">
+                    <input type="text" id="autocomplete-input" class="autocomplete" name="id" value="{{ id }}">
                     <label for="autocomplete-input">사용자 아이디</label>
+                    {% if err %}
+                        <span class="pink-text text-darken-3">BOJ에 등록되어있지 않은 사용자입니다.</span>
+                    {% endif %}
                 </div>
             </div>
             <button class="btn-large waves-effect waves-light pink lighten-2 flow-text" type="submit">전적 검색하기</button>

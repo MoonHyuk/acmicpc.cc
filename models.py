@@ -12,6 +12,7 @@ class User(db.Model):
     tobcoder_rating = db.Column(db.Integer, default=0)
     codeforce_id = db.Column(db.String(20), default="")
     codeforce_rating = db.Column(db.Integer, default=0)
+    update_time = db.Column(db.DateTime)
 
 
 class Submission(db.Model):
