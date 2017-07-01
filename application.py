@@ -38,7 +38,12 @@ def update_profile(user):
 
     soup = BeautifulSoup(source, "html.parser")
     intro = soup.blockquote.string
-    user.intro = intro
+    solved_num = soup.tbody.find_all('tr')[1].td.string
+
+    if user.intro != intro:
+        user.intro = intro
+    if user.solved_num != solved_num:
+        user.solved_num = solved_num
     db.session.commit()
 
 

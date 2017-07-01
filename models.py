@@ -7,12 +7,13 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     boj_id = db.Column(db.String(20), unique=True, nullable=False)
-    into = db.Column(db.String(100), default="")
+    intro = db.Column(db.String(100), default="")
     tobcoder_id = db.Column(db.String(20), default="")
     tobcoder_rating = db.Column(db.Integer, default=0)
     codeforce_id = db.Column(db.String(20), default="")
     codeforce_rating = db.Column(db.Integer, default=0)
     update_time = db.Column(db.DateTime)
+    solved_num = db.Column(db.Integer, default=0)
 
 
 class Submission(db.Model):

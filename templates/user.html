@@ -12,6 +12,11 @@
             <blockquote>{{ user.intro }}</blockquote>
         </div>
     </div>
+    <div class="row">
+    {% include "chips.html" %}
+    </div>
+    <hr>
 
-    <h4>푼 문제</h4>
+    <h4 style="display: inline-block">푼 문제</h4>
+    총 {{ user.solved_num }} 문제 / 지난 일주일간 문제
 {% endblock %}
