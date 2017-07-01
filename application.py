@@ -31,7 +31,15 @@ def is_boj_user(user_id):
 
 def update_profile(user):
     url = "https://www.acmicpc.net/user/" + user.boj_id
+    req = urllib.request.Request(url, headers=hds)
+    fp = urllib.request.urlopen(req)
+    source = fp.read()
+    fp.close()
 
+    soup = BeautifulSoup(source, "html.parser")
+    intro = soup.blockquote.string
+    user.intro = intro
+    db.session.commit()
 
 
 @application.route('/')
