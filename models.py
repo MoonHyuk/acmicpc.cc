@@ -1,19 +1,31 @@
-from application import db
-from sqlalchemy.dialects.postgresql import JSON
+from flask_sqlalchemy import SQLAlchemy
+
+
+db = SQLAlchemy()
 
 
 class User(db.Model):
-    __tablename__ = 'user'
-
     id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String())
-    result_all = db.Column(JSON)
-    result_no_stop_words = db.Column(JSON)
+    boj_id = db.Column(db.String(20), unique=True, nullable=False)
+    into = db.Column(db.String(100), default="")
+    tobcoder_id = db.Column(db.String(20), default="")
+    tobcoder_rating = db.Column(db.Integer, default=0)
+    codeforce_id = db.Column(db.String(20), default="")
+    codeforce_rating = db.Column(db.Integer, default=0)
 
-    def __init__(self, url, result_all, result_no_stop_words):
-        self.url = url
-        self.result_all = result_all
-        self.result_no_stop_words = result_no_stop_words
 
-    def __repr__(self):
-        return '<id {}>'.format(self.id)
+class Submission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    submit_id = db.Column(db.Integer, unique=True, nullable=False)
+    number = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    result = db.Column(db.Integer, nullable=False)
+    language = db.Column(db.Integer, nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False)
+
+
+class Ranking(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    rank = db.Column(db.Integer, nullable=False)
+    date = db.Column(db.Date, nullable=False)

@@ -1,16 +1,17 @@
+import os
+
 from bs4 import BeautifulSoup
 from flask import Flask, render_template
-from flask_sqlalchemy import SQLAlchemy
-import os
+from models import db
 
 
 application = Flask(__name__)
 application.config.from_object(os.environ['APP_SETTINGS'])
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(application)
+db.init_app(application)
 
 
-# from models import User
+from models import User
 
 
 @application.route('/')
