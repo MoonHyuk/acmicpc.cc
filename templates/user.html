@@ -6,27 +6,41 @@
 
 {% block content %}
     {% if user.update_time is none %}
-    <div class="row">
-        <div class="col s12">
-            <h3 class="pink-text">{{ user.boj_id }}</h3><span class="grey-text">정보를 갱신중입니다.</span>
-            <div class="progress">
-                <div class="indeterminate"></div>
+        <div class="row">
+            <div class="col s12">
+                <h3 class="pink-text">{{ user.boj_id }}</h3>
             </div>
         </div>
-    </div>
-    {% else %}
-    <div class="row">
-        <div class="col s12 pink-text">
-            <h3>{{ user.boj_id }}</h3>
-            <blockquote>{{ user.intro }}</blockquote>
+        <div class="preload center" style="position:absolute; left: 50%; margin-left: -60px; top: 42%;">
+            <div class="preloader-wrapper big active">
+                <div class="spinner-layer spinner-blue-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="grey-text">정보를 갱신중입니다.</div>
         </div>
-    </div>
-    <div class="row">
-    {% include "chips.html" %}
-    </div>
-    <hr>
 
-    <h4 style="display: inline-block">푼 문제</h4>
-    총 {{ user.solved_num }} 문제 / 지난 일주일간 문제
+    {% else %}
+        <div class="row">
+            <div class="col s12 pink-text">
+                <h3>{{ user.boj_id }}</h3>
+                <blockquote>{{ user.intro }}</blockquote>
+            </div>
+        </div>
+        <div class="row">
+            {% include "chips.html" %}
+        </div>
+        <hr>
+
+        <h4 style="display: inline-block">푼 문제</h4>
+        총 {{ user.solved_num }} 문제 / 지난 일주일간 문제
     {% endif %}
 {% endblock %}
