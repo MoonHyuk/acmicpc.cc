@@ -1,48 +1,33 @@
 {% if user.solved_num >= 50 and user.solved_num < 100 %}
-    <div class="chip deep-orange lighten-3">50문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 100 and user.solved_num < 150 %}
-    <div class="chip deep-orange lighten-2">100문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 150 and user.solved_num < 200 %}
-    <div class="chip deep-orange lighten-1">150문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 200 and user.solved_num < 300 %}
-    <div class="chip deep-orange">200문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 300 and user.solved_num < 400 %}
-    <div class="chip deep-orange darken-1 white-text">300문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 400 and user.solved_num < 500 %}
-    <div class="chip lime accent-1">400문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 500 and user.solved_num < 600 %}
-    <div class="chip lime accent-2">500문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 600 and user.solved_num < 700 %}
-    <div class="chip lime accent-3">600문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 700 and user.solved_num < 800 %}
-    <div class="chip light-green accent-3">700문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 800 and user.solved_num < 900 %}
-    <div class="chip teal accent-3">800문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 900 and user.solved_num < 1000 %}
-    <div class="chip cyan accent-3">900문제 돌파</div>
-{% endif %}
-{% if user.solved_num >= 1000 and user.solved_num < 1500 %}
-    <div class="chip blue accent-2">1000문제 돌파!</div>
-{% endif %}
-{% if user.solved_num >= 1500 and user.solved_num < 2000 %}
-    <div class="chip blue darken-4 white-text">1500문제 돌파!</div>
-{% endif %}
-{% if user.solved_num >= 2000 and user.solved_num < 3000 %}
-    <div class="chip deep-purple darken-3 white-text">2000문제 돌파!!</div>
-{% endif %}
-{% if user.solved_num >= 3000 and user.solved_num < 4000 %}
-    <div class="chip purple darken-1 white-text">3000문제 돌파!!!</div>
-{% endif %}
-{% if user.solved_num >= 4000 and user.solved_num < 5000 %}
-    <div class="chip purple darken-4 white-text">4000문제 돌파!!!!</div>
+    <div class="chip animated fadeIn deep-orange lighten-3">50문제 돌파</div>
+{% elif user.solved_num >= 100 and user.solved_num < 150 %}
+    <div class="chip animated fadeIn deep-orange lighten-2">100문제 돌파</div>
+{% elif user.solved_num >= 150 and user.solved_num < 200 %}
+    <div class="chip animated fadeIn deep-orange lighten-1">150문제 돌파</div>
+{% elif user.solved_num >= 200 and user.solved_num < 300 %}
+    <div class="chip animated fadeIn deep-orange">200문제 돌파</div>
+{% elif user.solved_num >= 300 and user.solved_num < 400 %}
+    <div class="chip animated fadeIn deep-orange darken-1 white-text">300문제 돌파</div>
+{% elif user.solved_num >= 400 and user.solved_num < 500 %}
+    <div class="chip animated fadeIn lime accent-1">400문제 돌파</div>
+{% elif user.solved_num >= 500 and user.solved_num < 600 %}
+    <div class="chip animated fadeIn lime accent-2">500문제 돌파</div>
+{% elif user.solved_num >= 600 and user.solved_num < 700 %}
+    <div class="chip animated fadeIn lime accent-3">600문제 돌파</div>
+{% elif user.solved_num >= 700 and user.solved_num < 800 %}
+    <div class="chip animated fadeIn light-green accent-3">700문제 돌파</div>
+{% elif user.solved_num >= 800 and user.solved_num < 900 %}
+    <div class="chip animated fadeIn teal accent-3">800문제 돌파</div>
+{% elif user.solved_num >= 900 and user.solved_num < 1000 %}
+    <div class="chip animated fadeIn cyan accent-3">900문제 돌파</div>
+{% elif user.solved_num >= 1000 and user.solved_num < 1500 %}
+    <div class="chip animated fadeIn blue accent-2">1000문제 돌파!</div>
+{% elif user.solved_num >= 1500 and user.solved_num < 2000 %}
+    <div class="chip animated fadeIn blue darken-4 white-text">1500문제 돌파!</div>
+{% elif user.solved_num >= 2000 and user.solved_num < 3000 %}
+    <div class="chip animated fadeIn deep-purple darken-3 white-text">2000문제 돌파!!</div>
+{% elif user.solved_num >= 3000 and user.solved_num < 4000 %}
+    <div class="chip animated fadeIn purple darken-1 white-text">3000문제 돌파!!!</div>
+{% elif user.solved_num >= 4000 and user.solved_num < 5000 %}
+    <div class="chip animated fadeIn purple darken-4 white-text">4000문제 돌파!!!!</div>
 {% endif %}

@@ -5,7 +5,16 @@
 {% endblock %}
 
 {% block content %}
-
+    {% if user.update_time is none %}
+    <div class="row">
+        <div class="col s12">
+            <h3 class="pink-text">{{ user.boj_id }}</h3><span class="grey-text">정보를 갱신중입니다.</span>
+            <div class="progress">
+                <div class="indeterminate"></div>
+            </div>
+        </div>
+    </div>
+    {% else %}
     <div class="row">
         <div class="col s12 pink-text">
             <h3>{{ user.boj_id }}</h3>
@@ -19,4 +28,5 @@
 
     <h4 style="display: inline-block">푼 문제</h4>
     총 {{ user.solved_num }} 문제 / 지난 일주일간 문제
+    {% endif %}
 {% endblock %}

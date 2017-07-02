@@ -4,6 +4,8 @@ import datetime
 
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, request
+from flask_debugtoolbar import DebugToolbarExtension
+
 from models import db
 from models import User
 
@@ -11,6 +13,8 @@ application = Flask(__name__)
 application.config.from_object(os.environ['APP_SETTINGS'])
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(application)
+
+toolbar = DebugToolbarExtension(application)
 
 # define header for urllib request
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) ' \
@@ -24,6 +28,8 @@ def is_boj_user(user_id):
         req = urllib.request.Request(url, headers=hds)
         urllib.request.urlopen(req)
     except urllib.error.HTTPError:
+        return False
+    except UnicodeEncodeError:
         return False
     else:
         return True
@@ -55,20 +61,16 @@ def render_index():
 @application.route('/user')
 def search_user():
     user_id = request.args.get("id")
-    if not is_boj_user(user_id):
-        return render_template("index.html", id=user_id, err=True)
-    else:
-        if not User.query.filter_by(boj_id=user_id).scalar():
-            print("no")
+    if not User.query.filter_by(boj_id=user_id).scalar():
+        if is_boj_user(user_id):
             user = User(boj_id=user_id)
             db.session.add(user)
             db.session.commit()
+        else:
+            return render_template("index.html", id=user_id, err=True)
 
-        user = User.query.filter_by(boj_id=user_id).first()
-        if user.update_time is None or (datetime.datetime.now() - user.update_time).days > 0:
-            update_profile(user)
-
-        return render_template("user.html", user=user)
+    user = User.query.filter_by(boj_id=user_id).first()
+    return render_template("user.html", user=user)
 
 if __name__ == "__main__":
     application.run()
