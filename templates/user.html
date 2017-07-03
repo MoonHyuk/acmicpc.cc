@@ -5,7 +5,21 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.update_time is none %}
+    {% if not updated %}
+        <script>
+            $(function() {
+                $.ajax({
+                    url: "/update_user",
+                    type: "GET",
+                    data: {
+                        id: "{{ user.boj_id }}"
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                })
+            })
+        </script>
         <div class="row">
             <div class="col s12">
                 <h3 class="pink-text">{{ user.boj_id }}</h3>
@@ -26,7 +40,6 @@
                 </div>
             </div>
             <div class="grey-text">정보를 갱신중입니다.</div>
-            <div class="grey-text">사실 지금은 기다려도 아무것도 나오지 않습니다. 아직 개발중입니다.</div>
         </div>
 
     {% else %}

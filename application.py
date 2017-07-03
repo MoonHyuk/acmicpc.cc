@@ -3,7 +3,7 @@ import urllib.request
 import datetime
 
 from bs4 import BeautifulSoup
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, abort
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import db
@@ -35,8 +35,9 @@ def is_boj_user(user_id):
         return True
 
 
-def update_profile(user):
-    url = "https://www.acmicpc.net/user/" + user.boj_id
+def update_profile(user_id):
+    url = "https://www.acmicpc.net/user/" + user_id
+    user = User.query.filter_by(boj_id=user_id).first()
     req = urllib.request.Request(url, headers=hds)
     fp = urllib.request.urlopen(req)
     source = fp.read()
@@ -50,7 +51,10 @@ def update_profile(user):
         user.intro = intro
     if user.solved_num != solved_num:
         user.solved_num = solved_num
+
+    user.update_time = datetime.datetime.now()
     db.session.commit()
+    return user
 
 
 @application.route('/')
@@ -59,7 +63,7 @@ def render_index():
 
 
 @application.route('/user')
-def search_user():
+def get_user():
     user_id = request.args.get("id")
     if not User.query.filter_by(boj_id=user_id).scalar():
         if is_boj_user(user_id):
@@ -70,8 +74,22 @@ def search_user():
             return render_template("index.html", id=user_id, err=True)
 
     user = User.query.filter_by(boj_id=user_id).first()
-    return render_template("user.html", user=user)
+    if user.update_time is None or (datetime.datetime.now() - user.update_time).days > 0:
+        updated = False
+    else:
+        updated = True
+    return render_template("user.html", user=user, updated=updated)
+
+
+@application.route('/update_user')
+def update_user():
+    if request.is_xhr:
+        user_id = request.args.get('id')
+        update_profile(user_id)
+        return "OK"
+    else:
+        abort(404)
+
 
 if __name__ == "__main__":
     application.run()
-
