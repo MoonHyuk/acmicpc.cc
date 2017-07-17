@@ -23,7 +23,9 @@ class Submission(db.Model):
     problem_name = db.Column(db.String, nullable=False)
     boj_id = db.Column(db.String(20), db.ForeignKey("user.boj_id"), nullable=False)
     result = db.Column(db.Integer, nullable=False)
-    language = db.Column(db.String(10), nullable=False)
+    language = db.Column(db.String(20), nullable=False)
+    memory = db.Column(db.Integer, nullable=False)
+    time = db.Column(db.Integer, nullable=False)
     code_length = db.Column(db.Integer, nullable=False)
     datetime = db.Column(db.DateTime, nullable=False)
 
