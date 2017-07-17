@@ -39,8 +39,7 @@ def is_boj_user(user_id):
         return True
 
 
-def get_soup_from_url(url, user_id):
-    url = url + user_id
+def get_soup_from_url(url):
     req = urllib.request.Request(url, headers=hds)
     fp = urllib.request.urlopen(req)
     source = fp.read()
@@ -50,7 +49,7 @@ def get_soup_from_url(url, user_id):
 
 def update_profile(user_id):
     user = User.query.filter_by(boj_id=user_id).first()
-    soup = get_soup_from_url("https://www.acmicpc.net/user/", user_id)
+    soup = get_soup_from_url("https://www.acmicpc.net/user/" + user_id)
     intro = soup.blockquote.string
     solved_num = soup.tbody.find_all('tr')[1].td.string
 
@@ -66,7 +65,7 @@ def update_profile(user_id):
 
 
 def update_submission(user_id):
-    soup = get_soup_from_url("https://www.acmicpc.net/status/?user_id=", user_id)
+    soup = get_soup_from_url("https://www.acmicpc.net/status/?user_id=" + user_id)
     table = soup.find(id="status-table")
     trs = table.tbody.find_all('tr')
 
@@ -75,26 +74,48 @@ def update_submission(user_id):
     if submissions.scalar():
         latest_submit_id = submissions.first().submit_id
 
-    for tr in trs:
+    i = 0
+    while 1:
+        # If it's last submission
+        try:
+            tr = trs[i]
+        except LookupError:
+            break
+
+        # Parse data
         tds = tr.find_all('td')
-        submit_id = tds[0].string
+        submit_id = int(tds[0].string)
         if submit_id == latest_submit_id:
             break
-        problem_id = tds[2].a.string
+        problem_id = int(tds[2].a.string)
         problem_name = tds[2].a.attrs['title']
         result = tds[3].span.span.string.replace("\n", "").replace("\t", "")
         memory = tds[4].find(text=True, recursive=False)
         time = tds[5].find(text=True, recursive=False)
         language = tds[6].string.replace("\n", "").replace("\t", "")
-        code_length = tds[7].string[:-2].replace("\n", "").replace("\t", "").split(" ")[0]
+
+        # 코드 길이를 감추는 문제들이 있음. 그런 경우 code_length 를 0으로 해준다.
+        try:
+            code_length = int(tds[7].string[:-2].replace("\n", "").replace("\t", "").split(" ")[0])
+        except ValueError:
+            code_length = 0
         date = tds[8].a.attrs['title']
-        print(problem_id + " " + problem_name + " ")
+        date = datetime.datetime.strptime(date, "%Y년 %m월 %d일 %H시 %M분 %S초")
         print(result)
         print(memory)
         print(time)
         print(language)
         print(code_length)
         print(date)
+
+        # Load next submission page
+        if tr == trs[-1]:
+            soup = get_soup_from_url("https://www.acmicpc.net/status/?user_id=" + user_id + "&top=" + str(submit_id))
+            table = soup.find(id="status-table")
+            trs = table.tbody.find_all('tr')
+            i = 0
+        i += 1
+
 
 @application.route('/')
 def render_index():
