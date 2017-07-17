@@ -19,15 +19,17 @@ class User(db.Model):
 class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     submit_id = db.Column(db.Integer, unique=True, nullable=False)
-    number = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    problem_id = db.Column(db.Integer, nullable=False)
+    problem_name = db.Column(db.String, nullable=False)
+    boj_id = db.Column(db.String(20), db.ForeignKey("user.boj_id"), nullable=False)
     result = db.Column(db.Integer, nullable=False)
-    language = db.Column(db.Integer, nullable=False)
+    language = db.Column(db.String(10), nullable=False)
+    code_length = db.Column(db.Integer, nullable=False)
     datetime = db.Column(db.DateTime, nullable=False)
 
 
 class Ranking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    boj_id = db.Column(db.String(20), db.ForeignKey("user.boj_id"), nullable=False)
     rank = db.Column(db.Integer, nullable=False)
     date = db.Column(db.Date, nullable=False)
