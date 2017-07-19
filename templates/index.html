@@ -7,17 +7,12 @@
 {% block js %}
     <script>
       $(function() {
-          $('input.autocomplete').autocomplete({
-              data: {
-                  "example": null,
-                  "example2": null,
-                  "example3": null,
-                  "example4": null,
-                  "example5": null
-              },
-              limit: 5,
-              minLength: 1
-          });
+        // disable whitespaces in input
+        $('input').keyup(function(){
+            var str = $(this).val();
+            str = str.replace(/\s/g,'');
+            $(this).val(str)
+        });
       })
     </script>
 {% endblock %}

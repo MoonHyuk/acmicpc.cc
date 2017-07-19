@@ -174,5 +174,9 @@
         <div class="chart-container" style="position: relative; width:100%;">
             <canvas id="chart"></canvas>
         </div>
+        <div class="right-align grey-text">
+            최근 전적 갱신시간: {{ user.update_time.strftime('%Y-%m-%d %H:%M') }} <br>
+            (갱신은 1시간에 한번만 됩니다.)
+        </div>
     {% endif %}
 {% endblock %}
