@@ -87,7 +87,7 @@ def update_submission(user_id):
         submit_id = int(tds[0].string)
         date = tds[8].a.attrs['title']
         date = datetime.datetime.strptime(date, "%Y년 %m월 %d일 %H시 %M분 %S초")
-        if submit_id == latest_submit_id or (datetime.datetime.now() - date).days > 14:
+        if submit_id == latest_submit_id or (datetime.datetime.now() - date).days >= 14:
             break
         problem_id = int(tds[2].a.string)
         problem_name = tds[2].a.attrs['title']
@@ -144,11 +144,14 @@ def get_user():
             return render_template("index.html", id=user_id, err=True)
 
     user = User.query.filter_by(boj_id=user_id).first()
+    submissions = []
     if user.update_time is None or (datetime.datetime.now() - user.update_time).seconds > 3600:
         updated = False
     else:
         updated = True
-    return render_template("user.html", user=user, updated=updated)
+        two_weeks_ago = datetime.date.today() - datetime.timedelta(days=14)
+        submissions = Submission.query.filter_by(boj_id=user_id).filter(Submission.datetime > two_weeks_ago)
+    return render_template("user.html", user=user, updated=updated, submissions=submissions)
 
 
 @application.route('/update_user')

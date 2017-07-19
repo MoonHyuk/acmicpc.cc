@@ -4,10 +4,126 @@
     <link href="{{ url_for('static', filename = 'user.css') }}" rel="stylesheet">
 {% endblock %}
 
+{% block js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/locale/ko.js"></script>
+    <script>
+        function zeros(dimensions) {
+            var array = [];
+
+            for (var i = 0; i < dimensions[0]; ++i) {
+                array.push(dimensions.length == 1 ? 0 : zeros(dimensions.slice(1)));
+            }
+
+            return array;
+        }
+
+        $(function () {
+            var submitData = zeros([8, 14]);
+            {% for submit in submissions %}
+                var result = parseInt({{ submit.result }}) - 4;
+                var submitDate = "{{ submit.datetime }}".split(" ")[0];
+                submitDate = moment(submitDate);
+                var dateIndex = 13 - moment().diff(submitDate, 'days');
+                if (result >= 0 && dateIndex >= 0) {
+                    submitData[result][dateIndex] ++;
+                }
+            {% endfor %}
+            var dates = [];
+            for (var i=13; i>=0; i--) {
+                dates.push(moment().subtract(i, 'days').format("M/D"));
+            }
+
+            var legendConfig = window.innerWidth > 490;
+
+            var config = {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: "맞았습니다!!",
+                        backgroundColor: "#3366cc",
+                        borderColor: "#3366cc",
+                        data: submitData[0],
+                        fill: false,
+                    }, {
+                        label: "출력 형식",
+                        fill: false,
+                        backgroundColor: "#dc3912",
+                        borderColor: "#dc3912",
+                        data: submitData[1],
+                    }, {
+                        label: "틀렸습니다",
+                        fill: false,
+                        backgroundColor: "#ff9900",
+                        borderColor: "#ff9900",
+                        data: submitData[2],
+                    }, {
+                        label: "시간 초과",
+                        fill: false,
+                        backgroundColor: "#109618",
+                        borderColor: "#109618",
+                        data: submitData[3],
+                    }, {
+                        label: "메모리 초과",
+                        fill: false,
+                        backgroundColor: "#990099",
+                        borderColor: "#990099",
+                        data: submitData[4],
+                    }, {
+                        label: "출력 초과",
+                        fill: false,
+                        backgroundColor: "#0099c6",
+                        borderColor: "#0099c6",
+                        data: submitData[5],
+                    }, {
+                        label: "런타임 에러",
+                        fill: false,
+                        backgroundColor: "#dd4477",
+                        borderColor: "#dd4477",
+                        data: submitData[6],
+                    }, {
+                        label: "컴파일 에러",
+                        fill: false,
+                        backgroundColor: "#66aa00",
+                        borderColor: "#66aa00",
+                        data: submitData[7],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true,
+                        }],
+                        yAxes: [{
+                            display: true,
+                        }]
+                    },
+                    legend : {
+                        display: legendConfig
+                    }
+                }
+            };
+
+            var ctx = document.getElementById("chart").getContext("2d");
+            window.myLine = new Chart(ctx, config);
+        })
+    </script>
+{% endblock %}
 {% block content %}
     {% if not updated %}
         <script>
-            $(function() {
+            $(function () {
                 $.ajax({
                     url: "/update_user",
                     type: "GET",
@@ -38,7 +154,7 @@
                 </div>
             </div>
             <div class="grey-text">정보를 갱신중입니다.<br>
-            최근 14일간 푼 문제가 많은 경우 검색이 느릴 수 있습니다. 새로고침 하지 말고 기다려주세요!
+                최근 14일간 푼 문제가 많은 경우 검색이 느릴 수 있습니다. 새로고침 하지 말고 기다려주세요!
             </div>
         </div>
 
@@ -54,7 +170,9 @@
         </div>
         <hr>
 
-        <h4 style="display: inline-block">푼 문제</h4>
-        총 {{ user.solved_num }} 문제 / 지난 일주일간 문제
+        <h4 style="display: inline-block">최근 2주일 제출 통계</h4>
+        <div class="chart-container" style="position: relative; width:100%;">
+            <canvas id="chart"></canvas>
+        </div>
     {% endif %}
 {% endblock %}
