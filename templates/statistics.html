@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
+    <script>
+        $(function () {
+            var data = [];
+            {% for temp_data in data_list %}
+                data.push({x : {{ temp_data[0] }}, y : {{ temp_data[1] }} });
+            {% endfor %}
+            console.log(data);
+            var ctx = document.getElementById("chart").getContext("2d");
+            window.myScatter = Chart.Scatter(ctx, {
+                data: {
+                    datasets: [{
+                        label: " ",
+                        data: data,
+                        borderColor: 'rgba(0, 0, 0, 0)',
+                        borderWidth: 0,
+                        backgroundColor: "#dd4477",
+                        fill: false,
+                        radius: 3,
+                    }]
+                },
+                options: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: '백준 온라인 저지에서 푼 문제 수와 codeforce rating 간 관계'
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: '푼 문제 수'
+                            }
+                        }],
+                        yAxes: [{
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'codeforce rating'
+                            }
+                        }]
+
+                    }
+                }
+            })
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="chart-container" style="position: relative; width:100%;">
+        <canvas id="chart"></canvas>
+    </div>
+{% endblock %}

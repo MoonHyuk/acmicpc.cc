@@ -164,5 +164,17 @@ def update_user():
         abort(404)
 
 
+@application.route('/statistics')
+def statistics():
+    with open('ranking.txt', 'r') as f:
+        data_list = []
+        data_txt = f.readlines()
+        for data in data_txt:
+            data_list.append(data.strip('\n').split(' '))
+
+        return render_template("statistics.html", data_list=data_list)
+
+
+
 if __name__ == "__main__":
     application.run()

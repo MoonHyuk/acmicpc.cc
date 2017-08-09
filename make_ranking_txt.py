@@ -1,5 +1,5 @@
 ###################################################################################
-### This is a crawler which get ranking data of 5,000 users and make .json file ###
+#### This is a crawler which get ranking data of 5,000 users and make .txt file ###
 ###################################################################################
 
 import json
