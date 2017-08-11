@@ -1,11 +1,12 @@
 ###################################################################################
-#### This is a crawler which get ranking data of 5,000 users and make .txt file ###
+#### This is a crawler which get ranking data of 2,000 users and make .txt file ###
 ###################################################################################
 
 import json
 from application import get_soup_from_url
 
 data = []
+user_url_st = set()
 
 with open('ranking.txt', 'a') as f:
     for i in range(1, 21):
@@ -27,6 +28,11 @@ with open('ranking.txt', 'a') as f:
                 else:
                     user_id = tds[1].a.span.string
                 user_url = "https://www.acmicpc.net/user/" + user_id
+                if user_url in user_url_st:
+                    print("got some second id!!! " + user_url)
+                    continue
+
+                user_url_st.add(user_url)
                 user_soup = get_soup_from_url(user_url)
 
                 codeforce_th = user_soup.find('th', text='Codeforces')
