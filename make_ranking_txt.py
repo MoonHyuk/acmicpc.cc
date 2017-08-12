@@ -2,10 +2,8 @@
 #### This is a crawler which get ranking data of 2,000 users and make .txt file ###
 ###################################################################################
 
-import json
 from application import get_soup_from_url
 
-data = []
 user_url_st = set()
 
 with open('ranking.txt', 'a') as f:
@@ -50,7 +48,6 @@ with open('ranking.txt', 'a') as f:
                     continue
                 print(acc_rating)
 
-                data.append({num_solved, acc_rating})
                 f.write(num_solved + ' ' + acc_rating + '\n')
 
         print("page " + str(i) + " done.")
