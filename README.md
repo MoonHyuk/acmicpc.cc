@@ -1,11 +1,26 @@
 # acmicpc.cc
 
-## 사용 기술
+백준 온라인 저지 전적 검색, 통계 분석
 
-<img src="https://oden.io/9167bbc9f80645f714528abfc6b68baf.svg" width="200">
+## 개발환경 세팅
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/1200px-Postgresql_elephant.svg.png" width="200">
+```bash
+$ sudo apt install python3 python3-pip
+$ pip3 install virtualenv
+$ git clone git@github.com:MoonHyuk/acmicpc.cc.git
+$ cd acmicpc.cc
+$ virtualenv .venv
+$ . .venv/bin/activate
+(.venv) $ pip install -r requirements.txt
+```
 
-<img src="http://materializecss.com/res/materialize.svg" width="200">
+postegre를 로컬에 띄운 후 환경변수에 다음 두개를 추가해준다.  
+`APP_SETTINGS = config.DevelopmentConfig`  
+`DATABASE_URL = db 서버 주소`  
 
-<img src="https://colintoh.com/content/blog/14-aws-elastic-beanstalk-survival-guide-introduction/elastic_beanstalk_logo.png" width="200">
+```bash
+$ python manage.py db init
+$ python manage.py db migrate
+$ python manage.py db upgrade
+$ python application.py
+```
