@@ -59,7 +59,7 @@ def update_profile(user_id):
         user.solved_num = solved_num
 
     update_submission(user_id)
-    user.update_time = datetime.datetime.now()
+    user.update_time = datetime.datetime.utcnow()
     db.session.commit()
     return user
 
@@ -87,7 +87,7 @@ def update_submission(user_id):
         submit_id = int(tds[0].string)
         date = tds[8].a.attrs['title']
         date = datetime.datetime.strptime(date, "%Y년 %m월 %d일 %H시 %M분 %S초")
-        if submit_id == latest_submit_id or (datetime.datetime.now() - date).days >= 14:
+        if submit_id == latest_submit_id or (datetime.datetime.utcnow() - date).days >= 14:
             break
         problem_id = int(tds[2].a.string)
         problem_name = tds[2].a.attrs['title']
@@ -149,7 +149,7 @@ def get_user():
 
     user = User.query.filter_by(boj_id=user_id).first()
     submissions = []
-    if user.update_time is None or (datetime.datetime.now() - user.update_time).seconds > 3600:
+    if user.update_time is None or (datetime.datetime.utcnow() - user.update_time).seconds > 600:
         updated = False
     else:
         updated = True

@@ -136,6 +136,16 @@
 
             var ctx = document.getElementById("chart").getContext("2d");
             window.myLine = new Chart(ctx, config);
+
+            ///////////////////////timer///////////////////////////
+            setInterval(function () {
+                var utcNow = moment.utc();
+                var updateTime = moment.utc("{{ user.update_time }}");
+                var waitingSec = 600 - utcNow.diff(updateTime, "seconds");
+                var displayMin = parseInt(waitingSec / 60);
+                var displaySec = waitingSec % 60;
+                $('.timer').text(displayMin.toString() + "분 " + displaySec.toString() + "초 후");
+            }, 1000)
         })
     </script>
     {% endif %}
@@ -178,8 +188,8 @@
             <canvas id="chart"></canvas>
         </div>
         <div class="right-align grey-text">
-            최근 전적 갱신시간: {{ user.update_time.strftime('%Y-%m-%d %H:%M') }} <br>
-            (갱신은 1시간에 한번만 됩니다.)
+            최근 전적 갱신시간: {{ user.update_time.strftime('%Y-%m-%d %H:%M') }} (UTC) <br>
+            (다음 갱신 가능 시간: <span class="timer"></span>)
         </div>
     {% endif %}
 {% endblock %}
