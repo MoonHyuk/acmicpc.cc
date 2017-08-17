@@ -138,14 +138,23 @@
             window.myLine = new Chart(ctx, config);
 
             ///////////////////////timer///////////////////////////
-            setInterval(function () {
+            var intervalId = setInterval(function () {
                 var utcNow = moment.utc();
                 var updateTime = moment.utc("{{ user.update_time }}");
                 var waitingSec = 600 - utcNow.diff(updateTime, "seconds");
-                var displayMin = parseInt(waitingSec / 60);
-                var displaySec = waitingSec % 60;
-                $('.timer').text(displayMin.toString() + "분 " + displaySec.toString() + "초 후");
-            }, 1000)
+                var timerSpan = $('.timer');
+                if (waitingSec <= 0) {
+                    timerSpan.css("cursor", "pointer").addClass("red-text").text("갱신 가능").click(function () {
+                        location.reload();
+                    });
+                    clearInterval(intervalId);
+                }
+                else {
+                    var displayMin = parseInt(waitingSec / 60);
+                    var displaySec = waitingSec % 60;
+                    timerSpan.text(displayMin.toString() + "분 " + displaySec.toString() + "초 후");
+                }
+            }, 1000);
         })
     </script>
     {% endif %}
