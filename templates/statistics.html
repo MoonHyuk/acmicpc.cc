@@ -7,10 +7,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
     <script>
         $(function () {
-            var newbie=[], pupil=[], special=[], expert=[], candidate=[], master=[], iMaster=[], gMaster=[], igMaster=[], lgMaster=[];
+            var newbie = [], pupil = [], special = [], expert = [], candidate = [], master = [], iMaster = [], gMaster = [], igMaster = [], lgMaster = [];
 
             {% for temp_data in data_list %}
-                var new_data = {x : {{ temp_data[0] }}, y : {{ temp_data[1] }} };
+                var new_data = {x: {{ temp_data[0] }}, y: {{ temp_data[1] }}};
                 {% if temp_data[1] >= '2900' %}
                     lgMaster.push(new_data);
                 {% elif temp_data[1] < '2900' and temp_data[1] >= '2600' %}

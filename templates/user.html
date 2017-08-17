@@ -27,136 +27,136 @@
             })
         </script>
     {% else %}
-    <script>
-        function zeros(dimensions) {
-            var array = [];
+        <script>
+            function zeros(dimensions) {
+                var array = [];
 
-            for (var i = 0; i < dimensions[0]; ++i) {
-                array.push(dimensions.length == 1 ? 0 : zeros(dimensions.slice(1)));
-            }
-
-            return array;
-        }
-
-        $(function () {
-            var submitData = zeros([8, 14]);
-            {% for submit in submissions %}
-                var result = parseInt({{ submit.result }}) - 4;
-                var submitDate = "{{ submit.datetime }}".split(" ")[0];
-                submitDate = moment(submitDate);
-                var dateIndex = 13 - moment().diff(submitDate, 'days');
-                if (result >= 0 && dateIndex >= 0) {
-                    submitData[result][dateIndex] ++;
+                for (var i = 0; i < dimensions[0]; ++i) {
+                    array.push(dimensions.length == 1 ? 0 : zeros(dimensions.slice(1)));
                 }
-            {% endfor %}
-            var dates = [];
-            for (var i=13; i>=0; i--) {
-                dates.push(moment().subtract(i, 'days').format("M/D"));
+
+                return array;
             }
 
-            var legendConfig = window.innerWidth > 490;
+            $(function () {
+                var submitData = zeros([8, 14]);
+                {% for submit in submissions %}
+                    var result = parseInt({{ submit.result }}) - 4;
+                    var submitDate = "{{ submit.datetime }}".split(" ")[0];
+                    submitDate = moment(submitDate);
+                    var dateIndex = 13 - moment().diff(submitDate, 'days');
+                    if (result >= 0 && dateIndex >= 0) {
+                        submitData[result][dateIndex]++;
+                    }
+                {% endfor %}
+                var dates = [];
+                for (var i = 13; i >= 0; i--) {
+                    dates.push(moment().subtract(i, 'days').format("M/D"));
+                }
 
-            var config = {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: "맞았습니다!!",
-                        backgroundColor: "#3366cc",
-                        borderColor: "#3366cc",
-                        data: submitData[0],
-                        fill: false,
-                    }, {
-                        label: "출력 형식",
-                        fill: false,
-                        backgroundColor: "#dc3912",
-                        borderColor: "#dc3912",
-                        data: submitData[1],
-                    }, {
-                        label: "틀렸습니다",
-                        fill: false,
-                        backgroundColor: "#ff9900",
-                        borderColor: "#ff9900",
-                        data: submitData[2],
-                    }, {
-                        label: "시간 초과",
-                        fill: false,
-                        backgroundColor: "#109618",
-                        borderColor: "#109618",
-                        data: submitData[3],
-                    }, {
-                        label: "메모리 초과",
-                        fill: false,
-                        backgroundColor: "#990099",
-                        borderColor: "#990099",
-                        data: submitData[4],
-                    }, {
-                        label: "출력 초과",
-                        fill: false,
-                        backgroundColor: "#0099c6",
-                        borderColor: "#0099c6",
-                        data: submitData[5],
-                    }, {
-                        label: "런타임 에러",
-                        fill: false,
-                        backgroundColor: "#dd4477",
-                        borderColor: "#dd4477",
-                        data: submitData[6],
-                    }, {
-                        label: "컴파일 에러",
-                        fill: false,
-                        backgroundColor: "#66aa00",
-                        borderColor: "#66aa00",
-                        data: submitData[7],
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    tooltips: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    hover: {
-                        mode: 'nearest',
-                        intersect: true
-                    },
-                    scales: {
-                        xAxes: [{
-                            display: true,
-                        }],
-                        yAxes: [{
-                            display: true,
+                var legendConfig = window.innerWidth > 490;
+
+                var config = {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: "맞았습니다!!",
+                            backgroundColor: "#3366cc",
+                            borderColor: "#3366cc",
+                            data: submitData[0],
+                            fill: false,
+                        }, {
+                            label: "출력 형식",
+                            fill: false,
+                            backgroundColor: "#dc3912",
+                            borderColor: "#dc3912",
+                            data: submitData[1],
+                        }, {
+                            label: "틀렸습니다",
+                            fill: false,
+                            backgroundColor: "#ff9900",
+                            borderColor: "#ff9900",
+                            data: submitData[2],
+                        }, {
+                            label: "시간 초과",
+                            fill: false,
+                            backgroundColor: "#109618",
+                            borderColor: "#109618",
+                            data: submitData[3],
+                        }, {
+                            label: "메모리 초과",
+                            fill: false,
+                            backgroundColor: "#990099",
+                            borderColor: "#990099",
+                            data: submitData[4],
+                        }, {
+                            label: "출력 초과",
+                            fill: false,
+                            backgroundColor: "#0099c6",
+                            borderColor: "#0099c6",
+                            data: submitData[5],
+                        }, {
+                            label: "런타임 에러",
+                            fill: false,
+                            backgroundColor: "#dd4477",
+                            borderColor: "#dd4477",
+                            data: submitData[6],
+                        }, {
+                            label: "컴파일 에러",
+                            fill: false,
+                            backgroundColor: "#66aa00",
+                            borderColor: "#66aa00",
+                            data: submitData[7],
                         }]
                     },
-                    legend : {
-                        display: legendConfig
+                    options: {
+                        responsive: true,
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        hover: {
+                            mode: 'nearest',
+                            intersect: true
+                        },
+                        scales: {
+                            xAxes: [{
+                                display: true,
+                            }],
+                            yAxes: [{
+                                display: true,
+                            }]
+                        },
+                        legend: {
+                            display: legendConfig
+                        }
                     }
-                }
-            };
+                };
 
-            var ctx = document.getElementById("chart").getContext("2d");
-            window.myLine = new Chart(ctx, config);
+                var ctx = document.getElementById("chart").getContext("2d");
+                window.myLine = new Chart(ctx, config);
 
-            ///////////////////////timer///////////////////////////
-            var intervalId = setInterval(function () {
-                var utcNow = moment.utc();
-                var updateTime = moment.utc("{{ user.update_time }}");
-                var waitingSec = 600 - utcNow.diff(updateTime, "seconds");
-                var timerSpan = $('.timer');
-                if (waitingSec <= 0) {
-                    timerSpan.css("cursor", "pointer").addClass("red-text").text("갱신 가능").click(function () {
-                        location.reload();
-                    });
-                    clearInterval(intervalId);
-                }
-                else {
-                    var displayMin = parseInt(waitingSec / 60);
-                    var displaySec = waitingSec % 60;
-                    timerSpan.text(displayMin.toString() + "분 " + displaySec.toString() + "초 후");
-                }
-            }, 1000);
-        })
-    </script>
+                ///////////////////////timer///////////////////////////
+                var intervalId = setInterval(function () {
+                    var utcNow = moment.utc();
+                    var updateTime = moment.utc("{{ user.update_time }}");
+                    var waitingSec = 600 - utcNow.diff(updateTime, "seconds");
+                    var timerSpan = $('.timer');
+                    if (waitingSec <= 0) {
+                        timerSpan.css("cursor", "pointer").addClass("red-text").text("갱신 가능").click(function () {
+                            location.reload();
+                        });
+                        clearInterval(intervalId);
+                    }
+                    else {
+                        var displayMin = parseInt(waitingSec / 60);
+                        var displaySec = waitingSec % 60;
+                        timerSpan.text(displayMin.toString() + "분 " + displaySec.toString() + "초 후");
+                    }
+                }, 1000);
+            })
+        </script>
     {% endif %}
 {% endblock %}
 {% block content %}

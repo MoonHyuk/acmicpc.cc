@@ -22,7 +22,8 @@ with open('ranking.txt', 'a') as f:
                 print(num_solved)
                 ## Get codeforce profile url
                 if (rating == 'user-legendary'):
-                    user_id = tds[1].a.span.find(text=True, recursive=True) + tds[1].a.span.find(text=True, recursive=False)
+                    user_id = tds[1].a.span.find(text=True, recursive=True) + tds[1].a.span.find(text=True,
+                                                                                                 recursive=False)
                 else:
                     user_id = tds[1].a.span.string
                 user_url = "https://www.acmicpc.net/user/" + user_id
@@ -43,7 +44,8 @@ with open('ranking.txt', 'a') as f:
                 # Get accurate codeforce rating
                 codeforce_soup = get_soup_from_url(codeforce_url)
                 try:
-                    acc_rating = codeforce_soup.find('img', attrs={'title': 'User\'\'s contest rating in Codeforces community'}).findNext('span').string
+                    acc_rating = codeforce_soup.find('img', attrs={
+                        'title': 'User\'\'s contest rating in Codeforces community'}).findNext('span').string
                 except:
                     continue
                 print(acc_rating)
@@ -51,4 +53,3 @@ with open('ranking.txt', 'a') as f:
                 f.write(num_solved + ' ' + acc_rating + '\n')
 
         print("page " + str(i) + " done.")
-

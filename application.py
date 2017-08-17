@@ -179,6 +179,5 @@ def statistics():
         return render_template("statistics.html", data_list=data_list)
 
 
-
 if __name__ == "__main__":
     application.run()
