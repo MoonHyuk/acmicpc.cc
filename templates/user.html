@@ -8,6 +8,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/locale/ko.js"></script>
+    {% if not updated %}
+        <script>
+            $(function () {
+                $.ajax({
+                    url: "/update_user",
+                    type: "GET",
+                    data: {
+                        id: "{{ user.boj_id }}"
+                    },
+                    success: function () {
+                        location.reload();
+                    },
+                    error: function () {
+
+                    }
+                })
+            })
+        </script>
+    {% else %}
     <script>
         function zeros(dimensions) {
             var array = [];
@@ -119,26 +138,10 @@
             window.myLine = new Chart(ctx, config);
         })
     </script>
+    {% endif %}
 {% endblock %}
 {% block content %}
     {% if not updated %}
-        <script>
-            $(function () {
-                $.ajax({
-                    url: "/update_user",
-                    type: "GET",
-                    data: {
-                        id: "{{ user.boj_id }}"
-                    },
-                    success: function () {
-                        location.reload();
-                    },
-                    error: function () {
-
-                    }
-                })
-            })
-        </script>
         <div class="preload center" style="position:absolute; left: 50%; margin-left: -250px; top: 42%;">
             <div class="preloader-wrapper big active">
                 <div class="spinner-layer spinner-blue-only">

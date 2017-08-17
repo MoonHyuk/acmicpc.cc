@@ -92,30 +92,34 @@ def update_submission(user_id):
         problem_id = int(tds[2].a.string)
         problem_name = tds[2].a.attrs['title']
         result = tds[3].span.span.string.replace("\n", "").replace("\t", "")
-        result = RESULTS.index(result)
-
-        # 틀렸을 경우 메모리와 시간은 0으로 한다.
         try:
-            memory = int(tds[4].find(text=True, recursive=False))
-        except TypeError:
-            memory = 0
-        try:
-            time = int(tds[5].find(text=True, recursive=False))
-        except TypeError:
-            time = 0
-        language = tds[6].string.replace("\n", "").replace("\t", "")
+            result = RESULTS.index(result)
 
-        # 코드 길이를 감추는 문제들이 있음. 그런 경우 code_length 를 0으로 해준다.
-        try:
-            code_length = int(tds[7].string[:-2].replace("\n", "").replace("\t", "").split(" ")[0])
-        except ValueError:
-            code_length = 0
+            # 틀렸을 경우 메모리와 시간은 0으로 한다.
+            try:
+                memory = int(tds[4].find(text=True, recursive=False))
+            except TypeError:
+                memory = 0
+            try:
+                time = int(tds[5].find(text=True, recursive=False))
+            except TypeError:
+                time = 0
+            language = tds[6].string.replace("\n", "").replace("\t", "")
 
-        # Save data
-        submit = Submission(submit_id=submit_id, datetime=date, problem_id=problem_id, problem_name=problem_name,
-                            result=result, memory=memory, time=time, language=language, code_length=code_length,
-                            boj_id=user_id)
-        db.session.add(submit)
+            # 코드 길이를 감추는 문제들이 있음. 그런 경우 code_length 를 0으로 해준다.
+            try:
+                code_length = int(tds[7].string[:-2].replace("\n", "").replace("\t", "").split(" ")[0])
+            except ValueError:
+                code_length = 0
+
+            # Save data
+            submit = Submission(submit_id=submit_id, datetime=date, problem_id=problem_id, problem_name=problem_name,
+                                result=result, memory=memory, time=time, language=language, code_length=code_length,
+                                boj_id=user_id)
+            db.session.add(submit)
+
+        except:
+            pass
 
         # Load next submission page
         if tr == trs[-1]:
