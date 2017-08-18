@@ -138,7 +138,7 @@ def render_index():
 
 @application.route('/user')
 def get_user():
-    user_id = request.args.get("id")
+    user_id = request.args.get("id").strip()
     if not User.query.filter_by(boj_id=user_id).scalar():
         if is_boj_user(user_id):
             user = User(boj_id=user_id)

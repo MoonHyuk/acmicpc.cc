@@ -46,6 +46,13 @@
                     submitDate = moment(submitDate);
                     var dateIndex = 13 - moment().diff(submitDate, 'days');
                     if (result >= 0 && dateIndex >= 0) {
+                        var problemId = parseInt({{ submit.problem_id }});
+                        var problemName = "{{ submit.problem_name }}";
+                        var problemColor = result === 0 ? "green-text" : "red-text"
+                        $('.problemId-wrapper li')[dateIndex].innerHTML += ("<a href='https://www.acmicpc.net/problem/"
+                            + problemId + "' class='tooltipped " + problemColor + "' target='_blank' " +
+                            "data-position='right' data-delay='50' data-tooltip='" + problemName + "'>"
+                            + problemId + "</a>" + "<br>");
                         submitData[result][dateIndex]++;
                     }
                 {% endfor %}
@@ -137,6 +144,8 @@
                 var ctx = document.getElementById("chart").getContext("2d");
                 window.myLine = new Chart(ctx, config);
 
+                ///////////////////////Tooltip/////////////////////////
+                $('.tooltipped').tooltip({delay: 50});
                 ///////////////////////timer///////////////////////////
                 var intervalId = setInterval(function () {
                     var utcNow = moment.utc();
@@ -193,12 +202,36 @@
         <hr>
 
         <h4 style="display: inline-block">최근 2주일 제출 통계</h4>
-        <div class="chart-container" style="position: relative; width:100%;">
-            <canvas id="chart"></canvas>
-        </div>
-        <div class="right-align grey-text">
+        <div class="right-align grey-text" style="float: right">
             최근 전적 갱신시간: {{ user.update_time.strftime('%Y-%m-%d %H:%M') }} (UTC) <br>
             (다음 갱신 가능 시간: <span class="timer"></span>)
         </div>
+
+        <div class="chart-container" style="position: relative; width:100%;">
+            <canvas id="chart"></canvas>
+        </div>
+
+        <ul class="collapsible" data-collapsible="accordion">
+            <li>
+                <div class="collapsible-header center-align green-text">문제 번호 보기</div>
+                <ul class="collapsible-body problemId-wrapper center-align">
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                </ul>
+            </li>
+        </ul>
+
     {% endif %}
 {% endblock %}

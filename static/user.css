@@ -1,0 +1,16 @@
+.collapsible {
+    width: 104.3%;
+    margin-left: -16px;
+    border-bottom: none;
+}
+
+.problemId-wrapper {
+    padding: 1rem;
+    padding-right: 0;
+}
+
+.problemId-wrapper li {
+    width: 6.7%;
+    display: inline-block;
+    font-weight: bold;
+}
