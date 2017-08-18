@@ -36,7 +36,8 @@ def is_boj_user(user_id):
     except UnicodeEncodeError:
         return False
     else:
-        return True
+        soup = get_soup_from_url(url)
+        return soup.h1.string.strip()
 
 
 def get_soup_from_url(url):
@@ -139,22 +140,23 @@ def render_index():
 @application.route('/user')
 def get_user():
     user_id = request.args.get("id")
-    if not User.query.filter_by(boj_id=user_id).scalar():
-        if is_boj_user(user_id):
-            user = User(boj_id=user_id)
+    acc_user_id = is_boj_user(user_id)
+    if not User.query.filter_by(boj_id=acc_user_id).scalar():
+        if acc_user_id:
+            user = User(boj_id=acc_user_id)
             db.session.add(user)
             db.session.commit()
         else:
             return render_template("index.html", id=user_id, err=True)
 
-    user = User.query.filter_by(boj_id=user_id).first()
+    user = User.query.filter_by(boj_id=acc_user_id).first()
     submissions = []
     if user.update_time is None or (datetime.datetime.utcnow() - user.update_time).seconds > 600:
         updated = False
     else:
         updated = True
         two_weeks_ago = datetime.date.today() - datetime.timedelta(days=14)
-        submissions = Submission.query.filter_by(boj_id=user_id).filter(Submission.datetime > two_weeks_ago)
+        submissions = Submission.query.filter_by(boj_id=acc_user_id).filter(Submission.datetime > two_weeks_ago)
     return render_template("user.html", user=user, updated=updated, submissions=submissions)
 
 
