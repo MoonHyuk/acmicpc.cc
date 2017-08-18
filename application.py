@@ -143,13 +143,13 @@ def render_index():
 def get_user():
     user_id = request.args.get("id")
     acc_user_id = is_boj_user(user_id)
-    if not User.query.filter_by(boj_id=acc_user_id).scalar():
-        if acc_user_id:
+    if acc_user_id:
+        if not User.query.filter_by(boj_id=acc_user_id).scalar():
             user = User(boj_id=acc_user_id)
             db.session.add(user)
             db.session.commit()
-        else:
-            return render_template("index.html", id=user_id, err=True)
+    else:
+        return render_template("index.html", id=user_id, err=True)
 
     user = User.query.filter_by(boj_id=acc_user_id).first()
     submissions = []
