@@ -5,11 +5,13 @@ import datetime
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, request, abort
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_sslify import SSLify
 
 from models import db
 from models import User, Submission
 
 application = Flask(__name__)
+sslify = SSLify(application)
 application.config.from_object(os.environ['APP_SETTINGS'])
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(application)
