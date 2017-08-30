@@ -28,6 +28,7 @@
         </script>
     {% else %}
         <script>
+            moment.locale('ko');
             function zeros(dimensions) {
                 var array = [];
 
@@ -50,9 +51,9 @@
                         var problemName = "{{ submit.problem_name }}";
                         var problemColor = result === 0 ? "green-text" : "red-text"
                         $('.problemId-wrapper li')[dateIndex].innerHTML += ("<a href='https://www.acmicpc.net/problem/"
-                            + problemId + "' class='tooltipped " + problemColor + "' target='_blank' " +
-                            "data-position='right' data-delay='50' data-tooltip='" + problemName + "'>"
-                            + problemId + "</a>" + "<br>");
+                        + problemId + "' class='tooltipped " + problemColor + "' target='_blank' " +
+                        "data-position='right' data-delay='50' data-tooltip='" + problemName + "'>"
+                        + problemId + "</a>" + "<br>");
                         submitData[result][dateIndex]++;
                     }
                 {% endfor %}
@@ -72,56 +73,56 @@
                             backgroundColor: "#3366cc",
                             borderColor: "#3366cc",
                             data: submitData[0],
-                            fill: false,
+                            fill: false
                         }, {
                             label: "출력 형식",
                             fill: false,
                             backgroundColor: "#dc3912",
                             borderColor: "#dc3912",
-                            data: submitData[1],
+                            data: submitData[1]
                         }, {
                             label: "틀렸습니다",
                             fill: false,
                             backgroundColor: "#ff9900",
                             borderColor: "#ff9900",
-                            data: submitData[2],
+                            data: submitData[2]
                         }, {
                             label: "시간 초과",
                             fill: false,
                             backgroundColor: "#109618",
                             borderColor: "#109618",
-                            data: submitData[3],
+                            data: submitData[3]
                         }, {
                             label: "메모리 초과",
                             fill: false,
                             backgroundColor: "#990099",
                             borderColor: "#990099",
-                            data: submitData[4],
+                            data: submitData[4]
                         }, {
                             label: "출력 초과",
                             fill: false,
                             backgroundColor: "#0099c6",
                             borderColor: "#0099c6",
-                            data: submitData[5],
+                            data: submitData[5]
                         }, {
                             label: "런타임 에러",
                             fill: false,
                             backgroundColor: "#dd4477",
                             borderColor: "#dd4477",
-                            data: submitData[6],
+                            data: submitData[6]
                         }, {
                             label: "컴파일 에러",
                             fill: false,
                             backgroundColor: "#66aa00",
                             borderColor: "#66aa00",
-                            data: submitData[7],
+                            data: submitData[7]
                         }]
                     },
                     options: {
                         responsive: true,
                         tooltips: {
                             mode: 'index',
-                            intersect: false,
+                            intersect: false
                         },
                         hover: {
                             mode: 'nearest',
@@ -129,10 +130,10 @@
                         },
                         scales: {
                             xAxes: [{
-                                display: true,
+                                display: true
                             }],
                             yAxes: [{
-                                display: true,
+                                display: true
                             }]
                         },
                         legend: {
@@ -141,7 +142,7 @@
                     }
                 };
 
-                var ctx = document.getElementById("chart").getContext("2d");
+                var ctx = document.getElementById("chart-recent").getContext("2d");
                 window.myLine = new Chart(ctx, config);
 
                 ///////////////////////Tooltip/////////////////////////
@@ -164,6 +165,71 @@
                         timerSpan.text(displayMin.toString() + "분 " + displaySec.toString() + "초 후");
                     }
                 }, 1000);
+
+                ////////////////accepted_submissions////////////////////
+                {% if accepted_submissions | length %}
+                    function getDates(startDate, stopDate) {
+                        var dateArray = [];
+                        var currentDate = startDate;
+                        while (stopDate.diff(currentDate, 'days')) {
+                            dateArray.push(currentDate.format("Y/M/D"));
+                            currentDate = currentDate.add(1, 'day');
+                        }
+                        return dateArray;
+                    }
+
+                    var startDate = moment("{{ accepted_submissions[0].datetime }}".split(" ")[0]);
+                    var stopDate = moment();
+                    var acceptedChartDates = getDates(startDate, stopDate);
+
+                    var acceptedNum = [];
+                    var acceptedStat = [0, 0, 0, [0, ""]];
+                    var acceptedDateLn = acceptedChartDates.length;
+                    for (i=0; i<acceptedDateLn; i++) {
+                        acceptedNum.push(0);
+                    }
+                    {% for accepted_submit in accepted_submissions %}
+                        var acceptedSubmitDate = moment("{{ accepted_submit.datetime }}".split(" ")[0]);
+                        acceptedNum[acceptedSubmitDate.diff(moment(), 'days') + acceptedDateLn]++;
+                        acceptedStat[0] += {{ accepted_submit.code_length | int }};
+                        acceptedStat[1] += {{ accepted_submit.memory | int }};
+                        acceptedStat[2] += {{ accepted_submit.time | int }};
+                    {% endfor %}
+                    console.log(acceptedStat);
+                    var temp = 0;
+                    for (i=0; i<acceptedDateLn; i++) {
+                        if (acceptedStat[3][0] < acceptedNum[i]) {
+                            acceptedStat[3][0] = acceptedNum[i];
+                            acceptedStat[3][1] = acceptedChartDates[i];
+                        }
+                        temp += acceptedNum[i];
+                        acceptedNum[i] = temp;
+                    }
+
+                    $('.total-code-length').text(acceptedStat[0]);
+                    $('.total-memory').text(acceptedStat[1]);
+                    $('.total-time').text(acceptedStat[2]);
+                    $('.max-accepted-date').text(acceptedStat[3][1].replace('/', '년 ').replace('/', '월 ') + '일');
+                    $('.max-accepted-num').text(acceptedStat[3][0]);
+
+                    var accConfig = {
+                        type: 'line',
+                        data: {
+                            labels: acceptedChartDates,
+                            datasets: [{
+                                label: "푼 문제 수",
+                                data: acceptedNum,
+                                borderColor: "rgba(0, 0, 0, 0)",
+                                backgroundColor: "rgba(24, 173, 33, 0.3)",
+                                pointRadius: 0,
+                                borderWidth: 0
+                            }]
+                        }
+                    };
+
+                    var accCtx = document.getElementById("chart-accepted").getContext("2d");
+                    window.myLine = new Chart(accCtx, accConfig);
+                {% endif %}
             })
         </script>
     {% endif %}
@@ -208,14 +274,14 @@
         </div>
 
         <div class="chart-container" style="position: relative; width:100%;">
-            <canvas id="chart"></canvas>
+            <canvas id="chart-recent"></canvas>
         </div>
 
-        <ul class="collapsible" data-collapsible="accordion">
+        <ul class="collapsible show-on-large" data-collapsible="accordion">
             <li>
                 <div class="collapsible-header center-align green-text">문제 번호 보기</div>
                 <ul class="collapsible-body problemId-wrapper center-align">
-                    <li></li>
+                    <li class="flow-text"></li>
                     <li></li>
                     <li></li>
                     <li></li>
@@ -232,6 +298,35 @@
                 </ul>
             </li>
         </ul>
+
+        <h4 style="margin-top: 56px;">Accepted! History</h4>
+        {% if accepted_submissions | length %}
+            <div class="chart-container" style="position: relative; width:100%;">
+                <canvas id="chart-accepted"></canvas>
+            </div>
+
+            <div class="row center-align accepted-stat">
+                <div class="col s6 m3">
+                    <h5>총 코드 길이</h5>
+                    <span class="total-code-length pink-text"></span> 바이트
+                </div>
+                <div class="col s6 m3">
+                    <h5>총 메모리</h5>
+                    <span class="total-memory pink-text"></span> 킬로바이트
+                </div>
+                <div class="col s6 m3">
+                    <h5>총 수행 시간</h5>
+                    <span class="total-time pink-text"></span> ms
+                </div>
+                <div class="col s6 m3">
+                    <h5>가장 많은 문제를 푼 날</h5>
+                    <span class="max-accepted-date pink-text"></span>
+                    (<span class="max-accepted-num pink-text"></span>개)
+                </div>
+            </div>
+        {% else %}
+            곧 푼 문제수 그래프를 보실 수 있습니다.
+        {% endif %}
 
     {% endif %}
 {% endblock %}

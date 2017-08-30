@@ -8,7 +8,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_sslify import SSLify
 
 from models import db
-from models import User, Submission
+from models import User, Submission, AcceptedSubmission
 
 application = Flask(__name__)
 sslify = SSLify(application)
@@ -153,13 +153,16 @@ def get_user():
 
     user = User.query.filter_by(boj_id=acc_user_id).first()
     submissions = []
+    accepted_submissions = AcceptedSubmission.query.filter_by(boj_id=acc_user_id).order_by(
+        AcceptedSubmission.datetime).all()
     if user.update_time is None or (datetime.datetime.utcnow() - user.update_time).seconds > 600:
         updated = False
     else:
         updated = True
         two_weeks_ago = datetime.date.today() - datetime.timedelta(days=14)
         submissions = Submission.query.filter_by(boj_id=acc_user_id).filter(Submission.datetime > two_weeks_ago)
-    return render_template("user.html", user=user, updated=updated, submissions=submissions)
+    return render_template("user.html", user=user, updated=updated, submissions=submissions,
+                           accepted_submissions=accepted_submissions)
 
 
 @application.route('/update_user')

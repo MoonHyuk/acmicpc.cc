@@ -14,3 +14,15 @@
     display: inline-block;
     font-weight: bold;
 }
+
+.accepted-stat {
+    font-size: 1.4rem;
+}
+
+.accepted-stat h5 {
+    color: grey;
+}
+
+.total-code-length, .total-memory, .total-time, .max-accepted-date {
+    font-weight: bold;
+}

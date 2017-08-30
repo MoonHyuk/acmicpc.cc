@@ -34,3 +34,15 @@ class Ranking(db.Model):
     boj_id = db.Column(db.String(20), db.ForeignKey("user.boj_id"), nullable=False)
     rank = db.Column(db.Integer, nullable=False)
     date = db.Column(db.Date, nullable=False)
+
+
+class AcceptedSubmission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    submit_id = db.Column(db.Integer, unique=True, nullable=False)
+    problem_id = db.Column(db.Integer, nullable=False)
+    boj_id = db.Column(db.String(20), db.ForeignKey("user.boj_id"), nullable=False)
+    language = db.Column(db.String(20), nullable=False)
+    memory = db.Column(db.Integer, nullable=False)
+    time = db.Column(db.Integer, nullable=False)
+    code_length = db.Column(db.Integer, nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False)
