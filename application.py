@@ -2,13 +2,16 @@ import os
 import urllib.request
 import datetime
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, request, abort
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sslify import SSLify
+from pytz import timezone
 
 from models import db
 from models import User, Submission, AcceptedSubmission
+from scheduler import *
 
 application = Flask(__name__)
 sslify = SSLify(application)
@@ -187,4 +190,7 @@ def statistics():
 
 
 if __name__ == "__main__":
+    scheduler = BackgroundScheduler(timezone=timezone('Asia/Seoul'))
+    scheduler.add_job(update_accepted, 'cron', hour=24)
+    scheduler.start()
     application.run()
