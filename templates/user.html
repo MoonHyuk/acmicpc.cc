@@ -29,6 +29,7 @@
     {% else %}
         <script>
             moment.locale('ko');
+
             function zeros(dimensions) {
                 var array = [];
 
@@ -51,9 +52,9 @@
                         var problemName = "{{ submit.problem_name }}";
                         var problemColor = result === 0 ? "green-text" : "red-text"
                         $('.problemId-wrapper li')[dateIndex].innerHTML += ("<a href='https://www.acmicpc.net/problem/"
-                        + problemId + "' class='tooltipped " + problemColor + "' target='_blank' " +
-                        "data-position='right' data-delay='50' data-tooltip='" + problemName + "'>"
-                        + problemId + "</a>" + "<br>");
+                            + problemId + "' class='tooltipped " + problemColor + "' target='_blank' " +
+                            "data-position='right' data-delay='50' data-tooltip='" + problemName + "'>"
+                            + problemId + "</a>" + "<br>");
                         submitData[result][dateIndex]++;
                     }
                 {% endfor %}
@@ -183,9 +184,10 @@
                     var acceptedChartDates = getDates(startDate, stopDate);
 
                     var acceptedNum = [];
+                    var sumAcceptedNum = [];
                     var acceptedStat = [0, 0, 0, [0, ""]];
                     var acceptedDateLn = acceptedChartDates.length;
-                    for (i=0; i<acceptedDateLn; i++) {
+                    for (i = 0; i < acceptedDateLn; i++) {
                         acceptedNum.push(0);
                     }
                     {% for accepted_submit in accepted_submissions %}
@@ -197,13 +199,13 @@
                     {% endfor %}
                     console.log(acceptedStat);
                     var temp = 0;
-                    for (i=0; i<acceptedDateLn; i++) {
+                    for (i = 0; i < acceptedDateLn; i++) {
                         if (acceptedStat[3][0] < acceptedNum[i]) {
                             acceptedStat[3][0] = acceptedNum[i];
                             acceptedStat[3][1] = acceptedChartDates[i];
                         }
                         temp += acceptedNum[i];
-                        acceptedNum[i] = temp;
+                        sumAcceptedNum.push(temp);
                     }
 
                     $('.total-code-length').text(acceptedStat[0]);
@@ -220,10 +222,37 @@
                                 label: "푼 문제 수",
                                 data: acceptedNum,
                                 borderColor: "rgba(0, 0, 0, 0)",
-                                backgroundColor: "rgba(24, 173, 33, 0.3)",
+                                backgroundColor: "rgba(24, 173, 33, 0.8)",
                                 pointRadius: 0,
-                                borderWidth: 0
-                            }]
+                                borderWidth: 0,
+                                yAxisID: "y-axis-1"
+                            }, {
+                                    label: "푼 문제 수 (누적)",
+                                    data: sumAcceptedNum,
+                                    borderColor: "rgba(0, 0, 0, 0)",
+                                    backgroundColor: "rgba(24, 173, 33, 0.3)",
+                                    pointRadius: 0,
+                                    borderWidth: 0,
+                                    yAxisID: "y-axis-2"
+                                }]
+                        },
+                        options: {
+                            tooltips: {
+                                intersect: false
+                            },
+                            scales: {
+                                yAxes: [{
+                                    type: "linear",
+                                    display: true,
+                                    position: "left",
+                                    id: "y-axis-1"
+                                }, {
+                                    type: "linear",
+                                    display: true,
+                                    position: "right",
+                                    id: "y-axis-2"
+                                }]
+                            }
                         }
                     };
 

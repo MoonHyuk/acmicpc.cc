@@ -190,7 +190,4 @@ def statistics():
 
 
 if __name__ == "__main__":
-    scheduler = BackgroundScheduler(timezone=timezone('Asia/Seoul'))
-    scheduler.add_job(update_accepted, 'cron', hour=0, minute=20)
-    scheduler.start()
     application.run()

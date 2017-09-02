@@ -3,7 +3,7 @@ import datetime
 
 from flask import Flask
 
-from application import get_soup_from_url
+from application import *
 from models import db
 from models import User, AcceptedSubmission
 
