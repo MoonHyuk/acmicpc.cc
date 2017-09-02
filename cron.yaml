@@ -1,5 +1,5 @@
 version: 1
 cron:
- — name: "update_accepted"
+ - name: "update_accepted"
    url: "/update_accepted"
    schedule: "* * * * *"

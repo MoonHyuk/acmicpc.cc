@@ -134,7 +134,7 @@ def update_submission(user_id):
     db.session.commit()
 
 
-@application.route('/update_accepted', methods=['POST'])
+@application.route('/update_accepted')
 def update_accepted():
     users = User.query.all()
     for user in users:
@@ -216,6 +216,8 @@ def update_accepted():
             i += 1
         db.session.commit()
         print("user " + user_id + " done")
+
+    return render_template('index.html'), 200
 
 
 @application.route('/')
