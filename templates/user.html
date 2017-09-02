@@ -184,7 +184,6 @@
                     var acceptedChartDates = getDates(startDate, stopDate);
 
                     var acceptedNum = [];
-                    var sumAcceptedNum = [];
                     var acceptedStat = [0, 0, 0, [0, ""]];
                     var acceptedDateLn = acceptedChartDates.length;
                     for (i = 0; i < acceptedDateLn; i++) {
@@ -205,7 +204,7 @@
                             acceptedStat[3][1] = acceptedChartDates[i];
                         }
                         temp += acceptedNum[i];
-                        sumAcceptedNum.push(temp);
+                        acceptedNum[i] = temp;
                     }
 
                     $('.total-code-length').text(acceptedStat[0]);
@@ -219,40 +218,18 @@
                         data: {
                             labels: acceptedChartDates,
                             datasets: [{
-                                label: "푼 문제 수",
-                                data: acceptedNum,
-                                borderColor: "rgba(0, 0, 0, 0)",
-                                backgroundColor: "rgba(24, 173, 33, 0.8)",
-                                pointRadius: 0,
-                                borderWidth: 0,
-                                yAxisID: "y-axis-1"
-                            }, {
                                     label: "푼 문제 수 (누적)",
-                                    data: sumAcceptedNum,
+                                    data: acceptedNum,
                                     borderColor: "rgba(0, 0, 0, 0)",
                                     backgroundColor: "rgba(24, 173, 33, 0.3)",
                                     pointRadius: 0,
                                     borderWidth: 0,
-                                    yAxisID: "y-axis-2"
                                 }]
                         },
                         options: {
                             tooltips: {
                                 intersect: false
                             },
-                            scales: {
-                                yAxes: [{
-                                    type: "linear",
-                                    display: true,
-                                    position: "left",
-                                    id: "y-axis-1"
-                                }, {
-                                    type: "linear",
-                                    display: true,
-                                    position: "right",
-                                    id: "y-axis-2"
-                                }]
-                            }
                         }
                     };
 
