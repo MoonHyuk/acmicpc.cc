@@ -1,6 +1,7 @@
-import os
-import urllib.request
 import datetime
+import os
+from multiprocessing import Process
+import urllib.request
 
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, request, abort
@@ -134,12 +135,18 @@ def update_submission(user_id):
     db.session.commit()
 
 
-@application.route('/update_accepted')
-def update_accepted():
+def update_accepted(index=0, batch_num=10):
     with application.app_context():
-        users = User.query.all()
-        for user in users:
+        users = User.query.order_by(User.id).all()
+        count = User.query.count()
+        size = count // batch_num
+        proc = os.getpid()
+
+        start = index * size
+        end = (index + 1) * size if index + 1 != batch_num else count - 1
+        for user in users[start:end]:
             user_id = user.boj_id
+            print("user {0} start by: {1}".format(user_id, proc))
             url = "https://www.acmicpc.net/status/?user_id=" + user_id + "&result_id=4"
             soup = get_soup_from_url(url)
             table = soup.find(id="status-table")
@@ -217,7 +224,21 @@ def update_accepted():
             db.session.commit()
             print("user " + user_id + " done")
 
-        return render_template('index.html'), 200
+        print("Process {0} is done".format(proc))
+
+
+def schedule_accpeted():
+    with application.app_context():
+        BATCH_NUM = 10
+        procs = []
+
+        for index in range(BATCH_NUM):
+            proc = Process(target=update_accepted, args=(index, BATCH_NUM))
+            procs.append(proc)
+            proc.start()
+
+        for proc in procs:
+            proc.join()
 
 
 @application.route('/')
