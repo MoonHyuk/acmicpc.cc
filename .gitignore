@@ -81,6 +81,7 @@ celerybeat-schedule
 # Environments
 .env
 .venv
+.venv36
 env/
 venv/
 ENV/
@@ -107,3 +108,6 @@ ENV/
 
 # migration files
 /migrations
+
+# zappa settings
+zappa_settings.json
