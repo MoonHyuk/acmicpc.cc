@@ -1,4 +1,7 @@
+import json
+
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import JSON
 
 db = SQLAlchemy()
 
@@ -31,9 +34,8 @@ class Submission(db.Model):
 
 class Ranking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    boj_id = db.Column(db.String(20), db.ForeignKey("user.boj_id"), nullable=False)
-    rank = db.Column(db.Integer, nullable=False)
-    date = db.Column(db.Date, nullable=False)
+    boj_id = db.Column(db.String(20), nullable=False)
+    ranking = db.Column(JSON)
 
 
 class AcceptedSubmission(db.Model):

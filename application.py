@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 from multiprocessing import Process
 import urllib.request
@@ -9,7 +10,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_sslify import SSLify
 
 from models import db
-from models import User, Submission, AcceptedSubmission
+from models import User, Submission, AcceptedSubmission, Ranking
 
 application = Flask(__name__)
 sslify = SSLify(application)
@@ -143,7 +144,7 @@ def update_accepted(index=0, batch_num=10):
         proc = os.getpid()
 
         start = index * size
-        end = (index + 1) * size if index + 1 != batch_num else count - 1
+        end = (index + 1) * size if index + 1 != batch_num else count
         for user in users[start:end]:
             user_id = user.boj_id
             print("user {0} start by: {1}".format(user_id, proc))
@@ -174,11 +175,12 @@ def update_accepted(index=0, batch_num=10):
                 if submit_id == latest_submit_id:
                     break
 
-                problem_id = int(tds[2].a.string)
-                if problem_id not in prev_accepted_ids:
-                    date = tds[8].a.attrs['title']
-                    date = datetime.datetime.strptime(date, "%Y년 %m월 %d일 %H시 %M분 %S초")
-                    try:
+                try:
+                    problem_id = int(tds[2].a.string)
+                    if problem_id not in prev_accepted_ids:
+                        date = tds[8].a.attrs['title']
+                        date = datetime.datetime.strptime(date, "%Y년 %m월 %d일 %H시 %M분 %S초")
+
                         # 틀렸을 경우 메모리와 시간은 0으로 한다.
                         try:
                             memory = int(tds[4].find(text=True, recursive=False))
@@ -196,9 +198,10 @@ def update_accepted(index=0, batch_num=10):
                         except ValueError:
                             code_length = 0
 
-                        # Save data
+                            # Save data
                         if problem_id in new_accepted_ids:
-                            db.session.query(AcceptedSubmission).filter_by(boj_id=user_id, problem_id=problem_id).update({
+                            db.session.query(AcceptedSubmission).filter_by(boj_id=user_id,
+                                                                           problem_id=problem_id).update({
                                 "memory": memory, "time": time, "language": language, "code_length": code_length,
                                 "datetime": date
                             })
@@ -210,8 +213,8 @@ def update_accepted(index=0, batch_num=10):
                             db.session.add(accepted)
                             new_accepted_ids.append(problem_id)
 
-                    except:
-                        pass
+                except AttributeError:
+                    pass
 
                 # Load next submission page
                 if tr == trs[-1]:
@@ -229,7 +232,7 @@ def update_accepted(index=0, batch_num=10):
 
 def schedule_accpeted():
     with application.app_context():
-        BATCH_NUM = 10
+        BATCH_NUM = 1
         procs = []
 
         for index in range(BATCH_NUM):
@@ -239,6 +242,63 @@ def schedule_accpeted():
 
         for proc in procs:
             proc.join()
+
+
+def get_koo_rank():
+    with application.app_context():
+        koo_rank_dict = {}
+        i = 0
+        while 1:
+            url = "https://koosa.ga/ranking/" + str(i) + "/"
+            soup = get_soup_from_url(url)
+            table = soup.find('table')
+            trs = table.tbody.find_all('tr')
+            for tr in trs:
+                tds = tr.find_all('td')
+                tier = tds[2].string
+                if tier == "0 (0%)":
+                    return koo_rank_dict
+                boj_id = tds[1].string
+                koo_rank = int(tds[0].string)
+                koo_rank_dict[boj_id] = koo_rank
+            i += 1
+
+
+def update_rank():
+    with application.app_context():
+        koo_rank_dict = get_koo_rank()
+        date = datetime.date.today().strftime('%Y/%m/%d')
+        i = 1
+        while 1:
+            url = "https://www.acmicpc.net/ranklist/" + str(i)
+            soup = get_soup_from_url(url)
+            table = soup.find(id='ranklist')
+            trs = table.tbody.find_all('tr')
+            for tr in trs:
+                tds = tr.find_all('td')
+                if tds[3].a.string.strip() == '19':
+                    return
+                boj_id = ''.join(tds[1].find_all(text=True, recursive=True)).strip()
+                boj_rank = int(tds[0].string)
+                try:
+                    koo_rank = koo_rank_dict[boj_id]
+                except KeyError:
+                    koo_rank = 0
+                data = {date: [boj_rank, koo_rank]}
+                if not Ranking.query.filter_by(boj_id=boj_id).scalar():
+                    ranking = Ranking(boj_id=boj_id, ranking=data)
+                    db.session.add(ranking)
+                    db.session.commit()
+                else:
+                    user = Ranking.query.filter_by(boj_id=boj_id)
+                    new_ranking = json.loads(user.first().ranking)
+                    new_ranking.update(data)
+                    user.first().ranking = new_ranking
+                    db.session.commit()
+
+
+                print("{0} {1} {2}".format(boj_id, boj_rank, koo_rank))
+            i += 1
 
 
 @application.route('/')
@@ -259,17 +319,28 @@ def get_user():
         return render_template("index.html", id=user_id, err=True)
 
     user = User.query.filter_by(boj_id=acc_user_id).first()
-    submissions = []
-    accepted_submissions = AcceptedSubmission.query.filter_by(boj_id=acc_user_id).order_by(
-        AcceptedSubmission.datetime).all()
     if user.update_time is None or (datetime.datetime.utcnow() - user.update_time).seconds > 600:
         updated = False
+        submissions = []
+        accepted_submissions = []
+        ranking_date = []
+        boj_rank = []
+        koo_rank = []
+
     else:
         updated = True
         two_weeks_ago = datetime.date.today() - datetime.timedelta(days=14)
         submissions = Submission.query.filter_by(boj_id=acc_user_id).filter(Submission.datetime > two_weeks_ago)
+        accepted_submissions = AcceptedSubmission.query.filter_by(boj_id=acc_user_id).order_by(
+            AcceptedSubmission.datetime).all()
+        ranking_json = json.loads(Ranking.query.filter_by(boj_id=acc_user_id).first().ranking)
+        ranking_date = ranking_json.keys()
+        ranking_values = ranking_json.values()
+        boj_rank = [i[0] for i in ranking_values]
+        koo_rank = [i[1] for i in ranking_values]
     return render_template("user.html", user=user, updated=updated, submissions=submissions,
-                           accepted_submissions=accepted_submissions)
+                           accepted_submissions=accepted_submissions, ranking_date = ranking_date,
+                           boj_rank=boj_rank, koo_rank=koo_rank)
 
 
 @application.route('/update_user')
@@ -294,4 +365,4 @@ def statistics():
 
 
 if __name__ == "__main__":
-    application.run()
+    application.run(use_reloader=False)
