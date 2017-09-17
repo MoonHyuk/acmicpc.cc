@@ -334,8 +334,8 @@ def get_user():
         accepted_submissions = AcceptedSubmission.query.filter_by(boj_id=acc_user_id).order_by(
             AcceptedSubmission.datetime).all()
         ranking_json = json.loads(Ranking.query.filter_by(boj_id=acc_user_id).first().ranking)
-        ranking_date = list(ranking_json.keys())
-        ranking_values = ranking_json.values()
+        ranking_date = sorted(list(ranking_json.keys()))
+        ranking_values = [ranking_json[i] for i in ranking_date]
         boj_rank = [i[0] for i in ranking_values]
         koo_rank = [i[1] for i in ranking_values]
     return render_template("user.html", user=user, updated=updated, submissions=submissions,
