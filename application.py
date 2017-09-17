@@ -94,10 +94,10 @@ def update_submission(user_id):
         date = datetime.datetime.strptime(date, "%Y년 %m월 %d일 %H시 %M분 %S초")
         if submit_id == latest_submit_id or (datetime.datetime.utcnow() - date).days >= 14:
             break
-        problem_id = int(tds[2].a.string)
-        problem_name = tds[2].a.attrs['title']
-        result = tds[3].span.span.string.replace("\n", "").replace("\t", "")
         try:
+            problem_id = int(tds[2].a.string)
+            problem_name = tds[2].a.attrs['title']
+            result = tds[3].span.span.string.replace("\n", "").replace("\t", "")
             result = RESULTS.index(result)
 
             # 틀렸을 경우 메모리와 시간은 0으로 한다.
