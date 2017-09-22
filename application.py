@@ -330,7 +330,7 @@ def get_user():
         submissions = Submission.query.filter_by(boj_id=acc_user_id).filter(Submission.datetime > two_weeks_ago)
         accepted_submissions = AcceptedSubmission.query.filter_by(boj_id=acc_user_id).order_by(
             AcceptedSubmission.datetime).all()
-        ranking_json = json.loads(Ranking.query.filter_by(boj_id=acc_user_id).first().ranking)
+        ranking_json = json.loads(json.loads(Ranking.query.filter_by(boj_id=acc_user_id).first().ranking))
         ranking_date = sorted(list(ranking_json.keys()))
         ranking_values = [ranking_json[i] for i in ranking_date]
         boj_rank = [i[0] for i in ranking_values]
