@@ -24,6 +24,7 @@ toolbar = DebugToolbarExtension(application)
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) ' \
              'Chrome/58.0.3029.110 Safari/537.36'
 hds = {'User-Agent': user_agent}
+hds_json = {**hds, **{'Content-Type': 'Application/json'}}
 
 # constants
 RESULTS = ["기다리는 중", "재채점을 기다리는 중", "채점 준비중", "채점중", "맞았습니다!!", "출력 형식이 잘못되었습니다",
@@ -50,6 +51,14 @@ def get_soup_from_url(url):
     source = fp.read()
     fp.close()
     return BeautifulSoup(source, "html.parser")
+
+
+def request_koo_api(api, data):
+    req = urllib.request.Request("https://koosa.ga/api/" + api, data = json.dumps(data).encode("utf-8"), headers = hds_json)
+    fp = urllib.request.urlopen(req)
+    source = fp.read()
+    fp.close()
+    return json.loads(source.decode("utf-8"))["result"]
 
 
 def update_profile(user_id):
@@ -244,56 +253,44 @@ def schedule_accpeted():
             proc.join()
 
 
-def get_koo_rank():
-    with application.app_context():
-        koo_rank_dict = {}
-        i = 0
-        while 1:
-            url = "https://koosa.ga/ranking/" + str(i) + "/"
-            soup = get_soup_from_url(url)
-            table = soup.find('table')
-            trs = table.tbody.find_all('tr')
-            for tr in trs:
-                tds = tr.find_all('td')
-                tier = tds[2].string
-                if tier == "0 (0%)":
-                    return koo_rank_dict
-                boj_id = tds[1].string
-                koo_rank = int(tds[0].string)
-                koo_rank_dict[boj_id] = koo_rank
-            i += 1
-
-
 def update_rank():
     with application.app_context():
-        koo_rank_dict = get_koo_rank()
         date = datetime.date.today().strftime('%Y/%m/%d')
         i = 1
-        while 1:
+        run = True
+        while run:
             url = "https://www.acmicpc.net/ranklist/" + str(i)
             soup = get_soup_from_url(url)
             table = soup.find(id='ranklist')
             trs = table.tbody.find_all('tr')
+            boj_ids = list()
+            boj_ranks = list()
             for tr in trs:
                 tds = tr.find_all('td')
                 if tds[3].a.string.strip() == '19':
-                    return
-                boj_id = ''.join(tds[1].find_all(text=True, recursive=True)).strip()
-                boj_rank = int(tds[0].string)
-                try:
-                    koo_rank = koo_rank_dict[boj_id]
-                except KeyError:
+                    run = False
+                    break
+                boj_ids.append(''.join(tds[1].find_all(text=True, recursive=True)).strip())
+                boj_ranks.append(int(tds[0].string))
+            api = request_koo_api("user", boj_ids)
+            koo_ranks = list(user["ranking"] for user in api)
+            for _ in range(len(boj_ids)):
+                boj_id = boj_ids[_]
+                boj_rank = boj_ranks[_]
+                if koo_ranks[_] == None:
                     koo_rank = 0
+                else:
+                    koo_rank = koo_ranks[_] + 1
                 data = {date: [boj_rank, koo_rank]}
                 if not Ranking.query.filter_by(boj_id=boj_id).scalar():
-                    ranking = Ranking(boj_id=boj_id, ranking=data)
+                    ranking = Ranking(boj_id=boj_id, ranking=json.dumps(data))
                     db.session.add(ranking)
                     db.session.commit()
                 else:
                     user = Ranking.query.filter_by(boj_id=boj_id)
                     new_ranking = json.loads(user.first().ranking)
                     new_ranking.update(data)
-                    user.first().ranking = new_ranking
+                    user.first().ranking = json.dumps(new_ranking)
                     db.session.commit()
 
 
