@@ -333,11 +333,15 @@ def get_user():
         submissions = Submission.query.filter_by(boj_id=acc_user_id).filter(Submission.datetime > two_weeks_ago)
         accepted_submissions = AcceptedSubmission.query.filter_by(boj_id=acc_user_id).order_by(
             AcceptedSubmission.datetime).all()
-        ranking_json = json.loads(json.loads(Ranking.query.filter_by(boj_id=acc_user_id).first().ranking))
-        ranking_date = sorted(list(ranking_json.keys()))
-        ranking_values = [ranking_json[i] for i in ranking_date]
-        boj_rank = [i[0] for i in ranking_values]
-        koo_rank = [i[1] for i in ranking_values]
+        # ranking_json = json.loads(Ranking.query.filter_by(boj_id=acc_user_id).first().ranking)
+        # anking_date = sorted(list(ranking_json.keys()))
+        # ranking_values = [ranking_json[i] for i in ranking_date]
+        # boj_rank = [i[0] for i in ranking_values]
+        # koo_rank = [i[1] for i in ranking_values]
+        ranking_date = []
+        boj_rank = []
+        koo_rank = []
+
     return render_template("user.html", user=user, updated=updated, submissions=submissions,
                            accepted_submissions=accepted_submissions, ranking_date = ranking_date,
                            boj_rank=boj_rank, koo_rank=koo_rank)
