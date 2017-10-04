@@ -51,7 +51,7 @@ def get_soup_from_url(url):
     fp = urllib.request.urlopen(req)
     source = fp.read()
     fp.close()
-    return BeautifulSoup(source, "html.parser")
+    return BeautifulSoup(source, "lxml")
 
 
 def update_profile(user_id):

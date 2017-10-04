@@ -16,6 +16,7 @@ Flask-SSLify==0.1.5
 itsdangerous==0.24
 Jinja2==2.9.6
 kombu==4.1.0
+lxml==4.0.0
 Mako==1.0.6
 MarkupSafe==1.0
 psycopg2==2.7.1
