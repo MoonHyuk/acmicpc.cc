@@ -354,7 +354,7 @@
 
                     var punchCtx = document.getElementById("chart-punch-card").getContext("2d");
                     window.myLine = new Chart(punchCtx, punchConfig);
-
+                    $('.scrollspy').scrollSpy();
                 {% endif %}
             })
         </script>
@@ -391,7 +391,7 @@
         </div>
         <hr>
 
-        <h4 style="display: inline-block">최근 2주일 제출 통계</h4>
+        <h4 class="scrollspy" style="display: inline-block" id="recent-chart">최근 2주일 제출 통계</h4>
         <div class="right-align grey-text" style="float: right">
             최근 전적 갱신시간: {{ user.update_time.strftime('%Y-%m-%d %H:%M') }} (UTC) <br>
             (다음 갱신 가능 시간: <span class="timer"></span>)
@@ -423,7 +423,7 @@
             </li>
         </ul>
 
-        <h4 style="margin-top: 56px;">Accepted! History</h4>
+        <h4 class="scrollspy" style="margin-top: 56px;" id="accepted-chart">Accepted! History</h4>
         {% if accepted_submissions | length %}
             <div class="chart-container" style="position: relative; width:100%;">
                 <canvas id="chart-accepted"></canvas>
@@ -449,15 +449,15 @@
                 </div>
             </div>
 
-            <h4 style="margin-top: 56px;">Punch Card</h4>
-            <div class="chart-container" style="position: relative; width:100%;">
+            <h4 class="scrollspy" style="margin-top: 56px;" class="hide-on-med-and-down" id="punch-card">Punch Card</h4>
+            <div class="chart-container hide-on-med-and-down" style="position: relative; width:100%;">
                 <canvas id="chart-punch-card"></canvas>
             </div>
         {% else %}
             저희 사이트에 처음 오셨군요! 내일부터 푼 문제수 그래프를 보실 수 있습니다.
         {% endif %}
 
-        <h4 style="margin-top: 56px;">Ranking History</h4>
+        <h4 class="scrollspy" style="margin-top: 56px;" id="ranking-chart">Ranking History</h4>
         {% if ranking_date | length %}
             <div class="chart-container" style="position: relative; width:100%;">
                 <canvas id="chart-ranking"></canvas>
@@ -465,5 +465,13 @@
         {% else %}
             20문제 이상 푸셔야 그래프를 볼 수 있습니다.
         {% endif %}
+    <div class="hide-on-med-and-down" style="position: fixed; top: 62px; left: 0">
+      <ul class="section table-of-contents">
+        <li><a href="#recent-chart">최근 2주일 제출 통계</a></li>
+        <li><a href="#accepted-chart">Accepted! History</a></li>
+        <li><a href="#punch-card">Punch Card</a></li>
+        <li><a href="#ranking-chart">Ranking History</a></li>
+      </ul>
+    </div>
     {% endif %}
 {% endblock %}
