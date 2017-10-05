@@ -329,7 +329,7 @@ def get_user():
     else:
         updated = True
         two_weeks_ago = datetime.date.today() - datetime.timedelta(days=14)
-        submissions = Submission.query.filter_by(boj_id=acc_user_id).filter(Submission.datetime > two_weeks_ago)
+        submissions = Submission.query.filter_by(boj_id=acc_user_id).filter(Submission.datetime > two_weeks_ago).all()
         accepted_submissions = AcceptedSubmission.query.filter_by(boj_id=acc_user_id).order_by(
             AcceptedSubmission.datetime).all()
         if Ranking.query.filter_by(boj_id=acc_user_id).scalar():
@@ -366,4 +366,4 @@ def statistics():
 
 
 if __name__ == "__main__":
-    application.run(use_reloader=False)
+    application.run()

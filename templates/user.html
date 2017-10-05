@@ -50,7 +50,7 @@
                     if (result >= 0 && dateIndex >= 0) {
                         var problemId = parseInt({{ submit.problem_id }});
                         var problemName = "{{ submit.problem_name }}";
-                        var problemColor = result === 0 ? "green-text" : "red-text"
+                        var problemColor = result === 0 ? "green-text" : "red-text";
                         $('.problemId-wrapper li')[dateIndex].innerHTML += ("<a href='https://www.acmicpc.net/problem/"
                             + problemId + "' class='tooltipped " + problemColor + "' target='_blank' " +
                             "data-position='right' data-delay='50' data-tooltip='" + problemName + "'>"
@@ -281,6 +281,80 @@
 
                     var rankCtx = document.getElementById("chart-ranking").getContext("2d");
                     window.myLine = new Chart(rankCtx, rankConfig);
+
+                    var dayArr = [0,0,0,0,0,0,0];
+                    var timeArr = [0,0,0,0];
+                    var punchCardTemp = zeros([7,24]);
+                    {% for accepted_submit in accepted_submissions %}
+                        var day = moment("{{ accepted_submit.datetime }}").day();
+                        var time = moment("{{ accepted_submit.datetime }}").hours();
+                        dayArr[day]++;
+                        timeArr[parseInt(time/6)]++;
+                        punchCardTemp[day][time]++;
+                    {% endfor %}
+                    console.log(dayArr);
+                    console.log(timeArr);
+                    var preferredDay = 0, preferredTime = 0;
+                    for (i=1; i<7; i++) {
+                        if (dayArr[i] > dayArr[preferredDay]) preferredDay = i;
+                    }
+                    for (i=1; i<24; i++) {
+                        if (timeArr[i] > timeArr[preferredTime]) preferredTime = i;
+                    }
+                    var punchCardData = [];
+                    var weekday = ["일요일   ", "월요일   ", "화요일   ", "수요일   ", "목요일   ", "금요일   ", "토요일   "];
+                    var timeChips = [["야행성","grey darken-3"], ["아침형 인간","yellow darken-1"], ["오후를 좋아하는","cyan darken-1"], ["저녁형 인간","indigo darken-3"]];
+                    $('.preferred-day').html(weekday[preferredDay].trim()+"에 만나요");
+                    $('.preferred-time').html(timeChips[preferredTime][0]).addClass(timeChips[preferredTime][1]);
+                    for (i = 0; i < 7; i++) {
+                        for (j = 0; j < 24; j++) {
+                            if (punchCardTemp[i][j]) punchCardData.push({x:j, y:weekday[i], r:(5 + Math.min(punchCardTemp[i][j]/2, 20))});
+                        }
+                    }
+
+                    console.log(punchCardData);
+                    var punchConfig = {
+                        type: 'bubble',
+                        data: {
+                            yLabels: weekday,
+                            datasets: [{
+                                data: punchCardData
+                            }]
+                        },
+                        options : {
+                            legend: false,
+                            tooltips: {
+                                enabled: false
+                            },
+                            scales: {
+                                xAxes: [{
+                                    ticks: {
+                                        min: 0,
+                                        max: 23,
+                                        stepSize: 1
+                                    }
+                                }],
+                                yAxes: [{
+                                    type: "category",
+                                    ticks: {
+                                        reverse: true
+                                    }
+                                }]
+
+                            },
+                            layout: {
+                                padding: {
+                                    right: 30,
+                                    top: 30,
+                                    bottom: 30
+                                }
+                            }
+                        }
+                    };
+
+                    var punchCtx = document.getElementById("chart-punch-card").getContext("2d");
+                    window.myLine = new Chart(punchCtx, punchConfig);
+
                 {% endif %}
             })
         </script>
@@ -373,6 +447,11 @@
                     <span class="max-accepted-date pink-text"></span>
                     (<span class="max-accepted-num pink-text"></span>개)
                 </div>
+            </div>
+
+            <h4 style="margin-top: 56px;">Punch Card</h4>
+            <div class="chart-container" style="position: relative; width:100%;">
+                <canvas id="chart-punch-card"></canvas>
             </div>
         {% else %}
             저희 사이트에 처음 오셨군요! 내일부터 푼 문제수 그래프를 보실 수 있습니다.
