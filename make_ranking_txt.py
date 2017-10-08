@@ -44,8 +44,7 @@ with open('ranking.txt', 'a') as f:
                 # Get accurate codeforce rating
                 codeforce_soup = get_soup_from_url(codeforce_url)
                 try:
-                    acc_rating = codeforce_soup.find('img', attrs={
-                        'title': 'User\'\'s contest rating in Codeforces community'}).findNext('span').string
+                    acc_rating = codeforce_soup.find_all("span", class_="smaller")[0].find_all("span")[1].string
                 except:
                     continue
                 print(acc_rating)
