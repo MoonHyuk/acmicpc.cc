@@ -31,3 +31,13 @@
 {% elif user.solved_num >= 4000 and user.solved_num < 5000 %}
     <div class="chip animated fadeIn purple darken-4 white-text">4000문제 돌파!!!!</div>
 {% endif %}
+{% if not submissions | length %}
+    <div class="chip animated fadeIn grey darken-4 white-text">백준을 떠난</div>
+{% endif %}
+{% if submissions | length > 20 %}
+    <div class="chip animated fadeIn orange darken-1 white-text">근면한</div>
+{% endif %}
+{% if accepted_submissions | length %}
+    <div class="chip animated fadeIn preferred-day white-text"></div>
+    <div class="chip animated fadeIn preferred-time white-text"></div>
+{% endif %}
