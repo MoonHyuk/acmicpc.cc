@@ -136,8 +136,16 @@
                             borderWidth: 0,
                             backgroundColor: 'rgba(204, 204, 204, 0.7)',
                             fill: false,
+                        },
+                        {
+                            data: [{x:0, y:1458}, {x:5000, y: 3104}],
+                            borderColor: 'rgba(255, 51, 51, 0.7)',
+                            backgroundColor: 'rgba(255, 51, 51, 0.7)',
+                            fill: false,
+                            tooltip: {
+                                display: false
+                            }
                         }
-
                     ]
                 },
                 options: {
@@ -200,6 +208,10 @@
     <h4 class="pink-text text-accent-2">백준 온라인 저지에서 푼 문제 수와 codeforce rating 간 관계</h4>
     <div class="chart-container" style="position: relative; width:100%;">
         <canvas id="chart"></canvas>
+    </div>
+    <div class="center-align" style="padding-bottom: 48px;">
+        <h5 class="pink-text text-accent-2">Linear Regression Model</h5>
+        <img src="{{ url_for('static', filename = 'images/model.png') }}" style="width: 50%;">
     </div>
     <div class="row center-align">
         <div class="col s6 m3">
