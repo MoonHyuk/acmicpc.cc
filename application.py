@@ -6,9 +6,10 @@ from multiprocessing import Process
 import urllib.request
 
 from bs4 import BeautifulSoup
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, redirect, request, abort, url_for
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sslify import SSLify
+import requests
 
 from models import db
 from models import User, Submission, AcceptedSubmission, Ranking
@@ -232,7 +233,16 @@ def update_accepted(index=0, batch_num=10):
         print("Process {0} is done".format(proc))
 
 
-def schedule_accpeted():
+def redirect_accepted():
+    requests.get("https://acmicpc.cc/zappa/update_accepted", headers=hds)
+
+
+def redirect_rank():
+    requests.get("https://acmicpc.cc/zappa/update_rank", headers=hds)
+
+
+@application.route('/zappa/update_accepted')
+def schedule_accepted():
     with application.app_context():
         BATCH_NUM = 1
         procs = []
@@ -244,16 +254,17 @@ def schedule_accpeted():
 
         for proc in procs:
             proc.join()
-
+    return "OK"
 
 def request_koo_api(api, data):
-     req = urllib.request.Request("https://koosa.ga/api/" + api, data = json.dumps(data).encode("utf-8"), headers = hds_json)
-     fp = urllib.request.urlopen(req)
-     source = fp.read()
-     fp.close()
-     return json.loads(source.decode("utf-8"))["result"]
+    req = urllib.request.Request("https://koosa.ga/api/" + api, data=json.dumps(data).encode("utf-8"), headers=hds_json)
+    fp = urllib.request.urlopen(req)
+    source = fp.read()
+    fp.close()
+    return json.loads(source.decode("utf-8"))["result"]
 
 
+@application.route('/zappa/update_rank')
 def update_rank():
     with application.app_context():
         date = datetime.datetime.utcnow().strftime('%Y/%m/%d')
@@ -294,7 +305,6 @@ def update_rank():
                     new_ranking.update(data)
                     user.first().ranking = new_ranking
                     db.session.commit()
-
 
                 print("{0} {1} {2}".format(boj_id, boj_rank, koo_rank))
             i += 1
@@ -340,7 +350,7 @@ def get_user():
             koo_rank = [i[1] for i in ranking_values]
 
     return render_template("user.html", user=user, updated=updated, submissions=submissions,
-                           accepted_submissions=accepted_submissions, ranking_date = ranking_date,
+                           accepted_submissions=accepted_submissions, ranking_date=ranking_date,
                            boj_rank=boj_rank, koo_rank=koo_rank)
 
 
@@ -366,4 +376,4 @@ def statistics():
 
 
 if __name__ == "__main__":
-    application.run(use_reloader=False)
+    application.run()
