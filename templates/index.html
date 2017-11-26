@@ -11,6 +11,7 @@
             str = str.replace(/\s/g, '');
             $('input').val(str)
         }
+
         $(function () {
             // disable whitespaces in input
             $('input').on('keyup keypress', function () {
@@ -19,8 +20,15 @@
             $('div.btn-large').click(function () {
                 removeWhitespaces();
                 $('form').submit();
-            })
-        })
+            });
+            $('input').autocomplete({
+                data: {{ user | safe }},
+                limit: 10,
+                onAutocomplete: function() {
+                    $('form').submit();
+                }
+            });
+        });
     </script>
 {% endblock %}
 

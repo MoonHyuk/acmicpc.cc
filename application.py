@@ -6,7 +6,7 @@ from multiprocessing import Process
 import urllib.request
 
 from bs4 import BeautifulSoup
-from flask import Flask, render_template, redirect, request, abort, url_for
+from flask import Flask, render_template, request, abort
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sslify import SSLify
 import requests
@@ -233,15 +233,6 @@ def update_accepted(index=0, batch_num=10):
         print("Process {0} is done".format(proc))
 
 
-def redirect_accepted():
-    requests.get("https://acmicpc.cc/zappa/update_accepted", headers=hds)
-
-
-def redirect_rank():
-    requests.get("https://acmicpc.cc/zappa/update_rank", headers=hds)
-
-
-@application.route('/zappa/update_accepted')
 def schedule_accepted():
     with application.app_context():
         BATCH_NUM = 1
@@ -256,6 +247,7 @@ def schedule_accepted():
             proc.join()
     return "OK"
 
+
 def request_koo_api(api, data):
     req = urllib.request.Request("https://koosa.ga/api/" + api, data=json.dumps(data).encode("utf-8"), headers=hds_json)
     fp = urllib.request.urlopen(req)
@@ -264,13 +256,11 @@ def request_koo_api(api, data):
     return json.loads(source.decode("utf-8"))["result"]
 
 
-@application.route('/zappa/update_rank')
-def update_rank():
+def update_rank(event, context):
     with application.app_context():
+        my_kwargs = event.get("kwargs")
         date = datetime.datetime.utcnow().strftime('%Y/%m/%d')
-        i = 1
-        run = True
-        while run:
+        for i in range(my_kwargs["start"], my_kwargs["end"]):
             url = "https://www.acmicpc.net/ranklist/" + str(i)
             soup = get_soup_from_url(url)
             table = soup.find(id='ranklist')
@@ -279,8 +269,7 @@ def update_rank():
             boj_ranks = list()
             for tr in trs:
                 tds = tr.find_all('td')
-                if tds[3].a.string.strip() == '19':
-                    run = False
+                if int(tds[3].a.string.strip()) <= 19:
                     break
                 boj_ids.append(''.join(tds[1].find_all(text=True, recursive=True)).strip())
                 boj_ranks.append(int(tds[0].string))
@@ -307,12 +296,16 @@ def update_rank():
                     db.session.commit()
 
                 print("{0} {1} {2}".format(boj_id, boj_rank, koo_rank))
-            i += 1
+    return "OK"
 
 
 @application.route('/')
 def render_index():
-    return render_template("index.html")
+    user = [i.boj_id for i in User.query.order_by(User.update_time).all()][::-1]
+    user_dict = OrderedDict()
+    for i in user:
+        user_dict[i] = None
+    return render_template("index.html", user = json.dumps(user_dict))
 
 
 @application.route('/user')
