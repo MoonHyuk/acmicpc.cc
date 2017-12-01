@@ -6,7 +6,7 @@ from multiprocessing import Process
 import urllib.request
 
 from bs4 import BeautifulSoup
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sslify import SSLify
 import requests
@@ -355,10 +355,10 @@ def get_user():
 
 @application.route('/_get_friend_data')
 def get_friend_data():
-    print(request)
     friend_id = request.args.get("friend_id")
-    return friend_id
-    #friend_submissions = AcceptedSubmission.query.filter_by(boj_id=friend_id).order_by(AcceptedSubmission.datetime).all()
+    friend_accepted = AcceptedSubmission.query.filter_by(boj_id=friend_id).order_by(AcceptedSubmission.datetime).all()
+    ret = [d.__dict__['datetime'].strftime("%Y-%m-%d") for d in friend_accepted]
+    return jsonify(ret=ret)
 
 
 @application.route('/update_user')
