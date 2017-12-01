@@ -22,3 +22,7 @@ body {
 .main-container {
     padding-bottom: 100px;
 }
+
+.autocomplete-content {
+    position: absolute !important;
+}

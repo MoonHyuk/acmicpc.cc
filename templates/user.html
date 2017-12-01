@@ -248,13 +248,15 @@
                                 data: boj_rank,
                                 fill: false,
                                 backgroundColor: "#dd4477",
-                                borderColor: "#dd4477"
+                                borderColor: "#dd4477",
+                                pointRadius: 0
                             }, {
                                 label: "koosa.ga",
                                 data: koo_rank,
                                 fill: false,
                                 backgroundColor: "#990099",
-                                borderColor: "#990099"
+                                borderColor: "#990099",
+                                pointRadius: 0
                             }]
                         },
                         options: {
@@ -292,8 +294,6 @@
                         timeArr[parseInt(time/6)]++;
                         punchCardTemp[day][time]++;
                     {% endfor %}
-                    console.log(dayArr);
-                    console.log(timeArr);
                     var preferredDay = 0, preferredTime = 0;
                     for (i=1; i<7; i++) {
                         if (dayArr[i] > dayArr[preferredDay]) preferredDay = i;
@@ -312,7 +312,6 @@
                         }
                     }
 
-                    console.log(punchCardData);
                     var punchConfig = {
                         type: 'bubble',
                         data: {
@@ -356,6 +355,25 @@
                     window.myLine = new Chart(punchCtx, punchConfig);
                     $('.scrollspy').scrollSpy();
                 {% endif %}
+
+                //////////////친구와 비교하기///////////////
+                $('#friend').autocomplete({
+                    data: {{ user_ids | safe }},
+                    limit: 10,
+                    onAutocomplete: function() {
+                        $.ajax({
+                            url: "/_get_friend_data",
+                            data: {"friend_id": $('#friend').val()},
+                            type: 'GET',
+                            success: function(res) {
+                                console.log(res)
+                            },
+                            error: function () {
+                                
+                            }
+                        })
+                    }
+                });
             })
         </script>
     {% endif %}
@@ -422,8 +440,13 @@
                 </ul>
             </li>
         </ul>
-
         <h4 class="scrollspy" style="margin-top: 56px;" id="accepted-chart">Accepted! History</h4>
+        <div class="row">
+            <div class="input-field col s4">
+                <input type="text" name="friend_id" id="friend" class="autocomplete">
+                <label for="friend">친구와 비교해보세요!</label>
+            </div>
+        </div>
         {% if accepted_submissions | length %}
             <div class="chart-container" style="position: relative; width:100%;">
                 <canvas id="chart-accepted"></canvas>

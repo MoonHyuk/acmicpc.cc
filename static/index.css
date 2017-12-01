@@ -6,14 +6,3 @@
 .material-icons.prefix {
     margin-top: 12px;
 }
-
-.pink.btn-large {
-    position: fixed;
-    top: 211px;
-    left: 50%;
-    margin-left: -75px;
-}
-
-.input-field {
-    z-index: 1000;
-}

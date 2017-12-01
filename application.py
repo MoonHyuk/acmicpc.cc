@@ -315,6 +315,7 @@ def get_user():
     ranking_date = []
     boj_rank = []
     koo_rank = []
+    user_dict = []
     user_id = request.args.get("id")
     acc_user_id = is_boj_user(user_id)
     if acc_user_id:
@@ -342,9 +343,22 @@ def get_user():
             boj_rank = [i[0] for i in ranking_values]
             koo_rank = [i[1] for i in ranking_values]
 
+        user_ids = [i.boj_id for i in User.query.order_by(User.update_time).all()][::-1]
+        user_dict = OrderedDict()
+        for i in user_ids:
+            user_dict[i] = None
+
     return render_template("user.html", user=user, updated=updated, submissions=submissions,
                            accepted_submissions=accepted_submissions, ranking_date=ranking_date,
-                           boj_rank=boj_rank, koo_rank=koo_rank)
+                           boj_rank=boj_rank, koo_rank=koo_rank, user_ids=json.dumps(user_dict))
+
+
+@application.route('/_get_friend_data')
+def get_friend_data():
+    print(request)
+    friend_id = request.args.get("friend_id")
+    return friend_id
+    #friend_submissions = AcceptedSubmission.query.filter_by(boj_id=friend_id).order_by(AcceptedSubmission.datetime).all()
 
 
 @application.route('/update_user')
