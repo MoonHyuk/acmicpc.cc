@@ -6,31 +6,60 @@
 {% block js %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
     <script>
+        var pieChartData = zeros([4, 10]);
+
+        function zeros(dimensions) {
+            var array = [];
+
+            for (var i = 0; i < dimensions[0]; ++i) {
+                array.push(dimensions.length == 1 ? 0 : zeros(dimensions.slice(1)));
+            }
+            return array;
+        }
+
+        function addPieData(nSolved, rating) {
+            if (nSolved < 500) pieChartData[0][rating]++;
+            else if (nSolved < 1000) pieChartData[1][rating]++;
+            else if (nSolved < 2000) pieChartData[2][rating]++;
+            else pieChartData[3][rating]++;
+        }
+
         $(function () {
-            var newbie = [], pupil = [], special = [], expert = [], candidate = [], master = [], iMaster = [], gMaster = [], igMaster = [], lgMaster = [];
+            var newbie = [], pupil = [], special = [], expert = [], candidate = [], master = [], iMaster = [],
+                gMaster = [], igMaster = [], lgMaster = [];
 
             {% for temp_data in data_list %}
                 var new_data = {x: {{ temp_data[0] }}, y: {{ temp_data[1] }}};
                 {% if temp_data[1] >= '2900' %}
                     lgMaster.push(new_data);
+                    addPieData({{ temp_data[0] }}, 0);
                 {% elif temp_data[1] < '2900' and temp_data[1] >= '2600' %}
                     igMaster.push(new_data);
+                    addPieData({{ temp_data[0] }}, 1);
                 {% elif temp_data[1] < '2600' and temp_data[1] >= '2400' %}
                     gMaster.push(new_data);
+                    addPieData({{ temp_data[0] }}, 2);
                 {% elif temp_data[1] < '2400' and temp_data[1] >= '2300' %}
                     iMaster.push(new_data);
+                    addPieData({{ temp_data[0] }}, 3);
                 {% elif temp_data[1] < '2300' and temp_data[1] >= '2200' %}
                     master.push(new_data);
+                    addPieData({{ temp_data[0] }}, 4);
                 {% elif temp_data[1] < '2200' and temp_data[1] >= '1900' %}
                     candidate.push(new_data);
+                    addPieData({{ temp_data[0] }}, 5);
                 {% elif temp_data[1] < '1900' and temp_data[1] >= '1600' %}
                     expert.push(new_data);
+                    addPieData({{ temp_data[0] }}, 6);
                 {% elif temp_data[1] < '1600' and temp_data[1] >= '1400' %}
                     special.push(new_data);
+                    addPieData({{ temp_data[0] }}, 7);
                 {% elif temp_data[1] < '1400' and temp_data[1] >= '1200' %}
                     pupil.push(new_data);
+                    addPieData({{ temp_data[0] }}, 8);
                 {% else %}
                     newbie.push(new_data);
+                    addPieData({{ temp_data[0] }}, 9);
                 {% endif %}
             {% endfor %}
 
@@ -107,8 +136,16 @@
                             borderWidth: 0,
                             backgroundColor: 'rgba(204, 204, 204, 0.7)',
                             fill: false,
+                        },
+                        {
+                            data: [{x:0, y:1458}, {x:5000, y: 3104}],
+                            borderColor: 'rgba(255, 51, 51, 0.7)',
+                            backgroundColor: 'rgba(255, 51, 51, 0.7)',
+                            fill: false,
+                            tooltip: {
+                                display: false
+                            }
                         }
-
                     ]
                 },
                 options: {
@@ -127,13 +164,42 @@
                             display: true,
                             scaleLabel: {
                                 display: true,
-                                labelString: 'codeforce rating'
+                                labelString: 'codeforces max rating'
                             }
                         }]
 
                     }
                 }
-            })
+            });
+
+            for (var i = 0; i < 4; i++) {
+                var sum = 0;
+                for (var j = 0; j < 10; j++) {
+                    sum += pieChartData[i][j];
+                }
+                for (var j = 0; j < 10; j++) {
+                    pieChartData[i][j] /= sum / 1000;
+                    pieChartData[i][j] = parseInt(pieChartData[i][j]) / 10;
+                }
+            }
+            for (var i = 0; i < 4; i++) {
+                var pieCtx = document.getElementById(i.toString()).getContext("2d");
+                window.myPie = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        datasets: [{
+                            data: pieChartData[i],
+                            backgroundColor: ['rgb(170, 0, 0)', 'rgb(255, 51, 51)', 'rgb(255, 119, 119)', 'rgb(255, 187, 85)', 'rgb(255, 204, 136)', 'rgb(255, 136, 255)', 'rgb(170, 170, 255)', 'rgb(119, 221, 187)', 'rgb(119, 255, 119)', 'rgb(204, 204, 204)']
+                        }],
+                        labels: ["Legendary Grandmaster", "International Grandmaster", "Grandmaster", "International Master", "Master", "Candidate Master", "Expert", "Specialist", "Pupil", "Newbie"]
+                    },
+                    options: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                })
+            }
         });
     </script>
 {% endblock %}
@@ -143,4 +209,37 @@
     <div class="chart-container" style="position: relative; width:100%;">
         <canvas id="chart"></canvas>
     </div>
+    <div class="center-align" style="padding-bottom: 48px;">
+        <h5 class="pink-text text-accent-2">Linear Regression Model</h5>
+        <img src="{{ url_for('static', filename = 'images/model.png') }}" style="width: 50%;">
+    </div>
+    <div class="row center-align">
+        <div class="col s6 m3">
+            <div class="chart-container" style="position: relative; width:100%;">
+                <canvas id="0"></canvas>
+            </div>
+            <strong>500문제 미만</strong>
+        </div>
+        <div class="col s6 m3">
+            <div class="chart-container" style="position: relative; width:100%;">
+                <canvas id="1"></canvas>
+            </div>
+            <strong>500 ~ 999문제</strong>
+        </div>
+        <div class="col s6 m3">
+            <div class="chart-container" style="position: relative; width:100%;">
+                <canvas id="2"></canvas>
+            </div>
+            <strong>1000 ~ 1999문제</strong>
+        </div>
+        <div class="col s6 m3">
+            <div class="chart-container" style="position: relative; width:100%;">
+                <canvas id="3"></canvas>
+            </div>
+            <strong>2000문제 이상</strong>
+        </div>
+
+    </div>
+    사칭이 의심되는 데이터는 제거했습니다. 이제부터 codeforces의 max rating을 보여줍니다.<br>
+    업데이트 날짜: 2017년 10월 8일
 {% endblock %}

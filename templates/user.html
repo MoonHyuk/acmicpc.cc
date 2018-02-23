@@ -34,7 +34,7 @@
                 var array = [];
 
                 for (var i = 0; i < dimensions[0]; ++i) {
-                    array.push(dimensions.length == 1 ? 0 : zeros(dimensions.slice(1)));
+                    array.push(dimensions.length === 1 ? 0 : zeros(dimensions.slice(1)));
                 }
 
                 return array;
@@ -209,13 +209,13 @@
                         data: {
                             labels: acceptedChartDates,
                             datasets: [{
-                                    label: "푼 문제 수 (누적)",
-                                    data: acceptedNum,
-                                    borderColor: "rgba(0, 0, 0, 0)",
-                                    backgroundColor: "rgba(24, 173, 33, 0.3)",
-                                    pointRadius: 0,
-                                    borderWidth: 0,
-                                }]
+                                label: "푼 문제 수 (누적)",
+                                data: acceptedNum,
+                                borderColor: "rgba(0, 0, 0, 0)",
+                                backgroundColor: "rgba(24, 173, 33, 0.3)",
+                                pointRadius: 0,
+                                borderWidth: 0,
+                            }]
                         },
                         options: {
                             tooltips: {
@@ -230,7 +230,7 @@
                     };
 
                     var accCtx = document.getElementById("chart-accepted").getContext("2d");
-                    window.myLine = new Chart(accCtx, accConfig);
+                    var accChart = new Chart(accCtx, accConfig);
                 {% endif %}
 
                 ////////////////////ranking////////////////////////
@@ -248,13 +248,15 @@
                                 data: boj_rank,
                                 fill: false,
                                 backgroundColor: "#dd4477",
-                                borderColor: "#dd4477"
+                                borderColor: "#dd4477",
+                                pointRadius: 0
                             }, {
                                 label: "koosa.ga",
                                 data: koo_rank,
                                 fill: false,
                                 backgroundColor: "#990099",
-                                borderColor: "#990099"
+                                borderColor: "#990099",
+                                pointRadius: 0
                             }]
                         },
                         options: {
@@ -281,38 +283,40 @@
 
                     var rankCtx = document.getElementById("chart-ranking").getContext("2d");
                     window.myLine = new Chart(rankCtx, rankConfig);
-
-                    var dayArr = [0,0,0,0,0,0,0];
-                    var timeArr = [0,0,0,0];
-                    var punchCardTemp = zeros([7,24]);
+                {% endif %}
+                {% if accepted_submissions | length %}
+                    var dayArr = [0, 0, 0, 0, 0, 0, 0];
+                    var timeArr = [0, 0, 0, 0];
+                    var punchCardTemp = zeros([7, 24]);
                     {% for accepted_submit in accepted_submissions %}
                         var day = moment("{{ accepted_submit.datetime }}").day();
                         var time = moment("{{ accepted_submit.datetime }}").hours();
                         dayArr[day]++;
-                        timeArr[parseInt(time/6)]++;
+                        timeArr[parseInt(time / 6)]++;
                         punchCardTemp[day][time]++;
                     {% endfor %}
-                    console.log(dayArr);
-                    console.log(timeArr);
                     var preferredDay = 0, preferredTime = 0;
-                    for (i=1; i<7; i++) {
+                    for (i = 1; i < 7; i++) {
                         if (dayArr[i] > dayArr[preferredDay]) preferredDay = i;
                     }
-                    for (i=1; i<24; i++) {
+                    for (i = 1; i < 24; i++) {
                         if (timeArr[i] > timeArr[preferredTime]) preferredTime = i;
                     }
                     var punchCardData = [];
                     var weekday = ["일요일   ", "월요일   ", "화요일   ", "수요일   ", "목요일   ", "금요일   ", "토요일   "];
-                    var timeChips = [["야행성","grey darken-3"], ["아침형 인간","yellow darken-1"], ["오후를 좋아하는","cyan darken-1"], ["저녁형 인간","indigo darken-3"]];
-                    $('.preferred-day').html(weekday[preferredDay].trim()+"에 만나요");
+                    var timeChips = [["야행성", "grey darken-3"], ["아침형 인간", "yellow darken-1"], ["오후를 좋아하는", "cyan darken-1"], ["저녁형 인간", "indigo darken-3"]];
+                    $('.preferred-day').html(weekday[preferredDay].trim() + "에 만나요");
                     $('.preferred-time').html(timeChips[preferredTime][0]).addClass(timeChips[preferredTime][1]);
                     for (i = 0; i < 7; i++) {
                         for (j = 0; j < 24; j++) {
-                            if (punchCardTemp[i][j]) punchCardData.push({x:j, y:weekday[i], r:(5 + Math.min(punchCardTemp[i][j]/2, 20))});
+                            if (punchCardTemp[i][j]) punchCardData.push({
+                                x: j,
+                                y: weekday[i],
+                                r: (5 + Math.min(punchCardTemp[i][j] / 2, 20))
+                            });
                         }
                     }
 
-                    console.log(punchCardData);
                     var punchConfig = {
                         type: 'bubble',
                         data: {
@@ -321,7 +325,7 @@
                                 data: punchCardData
                             }]
                         },
-                        options : {
+                        options: {
                             legend: false,
                             tooltips: {
                                 enabled: false
@@ -355,6 +359,98 @@
                     var punchCtx = document.getElementById("chart-punch-card").getContext("2d");
                     window.myLine = new Chart(punchCtx, punchConfig);
                     $('.scrollspy').scrollSpy();
+
+                    //////////////친구와 비교하기///////////////
+                    $('#friend').autocomplete({
+                        data: {{ user_ids | safe }},
+                        limit: 10,
+                        onAutocomplete: function () {
+                            $.ajax({
+                                url: "/_get_friend_data",
+                                data: {"friend_id": $('#friend').val()},
+                                type: 'GET',
+                                success: function (s) {
+                                    ret = s["ret"];
+                                    var newDate = moment(ret[0]);
+                                    startDate = moment("{{ accepted_submissions[0].datetime }}".split(" ")[0]);
+                                    if (startDate.format("YYYY-MM-DD") > newDate.format("YYYY-MM-DD")) {
+                                        startDate = newDate;
+                                    }
+                                    acceptedChartDates = getDates(startDate, stopDate);
+                                    var acceptedNum = [];
+                                    var acceptedDateLn = acceptedChartDates.length;
+                                    for (i = 0; i < acceptedDateLn; i++) {
+                                        acceptedNum.push(0);
+                                    }
+                                    {% for accepted_submit in accepted_submissions %}
+                                        var acceptedSubmitDate = moment("{{ accepted_submit.datetime }}".split(" ")[0]);
+                                        acceptedNum[acceptedSubmitDate.diff(moment(), 'days') + acceptedDateLn]++;
+                                    {% endfor %}
+
+                                    var fAcceptedNum = [];
+                                    for (i = 0; i < acceptedDateLn; i++) {
+                                        fAcceptedNum.push(0);
+                                    }
+                                    ret.forEach(function (t) {
+                                        var fAcceptedSubmitDate = moment(t);
+                                        fAcceptedNum[fAcceptedSubmitDate.diff(moment(), 'days') + acceptedDateLn]++;
+                                    });
+                                    temp = 0;
+                                    var temp2 = 0;
+                                    for (i = 0; i < acceptedDateLn; i++) {
+                                        temp += acceptedNum[i];
+                                        acceptedNum[i] = temp;
+                                        temp2 += fAcceptedNum[i];
+                                        fAcceptedNum[i] = temp2;
+                                    }
+                                    var accConfig = {
+                                        type: 'line',
+                                        data: {
+                                            labels: acceptedChartDates,
+                                            datasets: [{
+                                                label: "나",
+                                                data: acceptedNum,
+                                                borderColor: "rgba(0, 0, 0, 0)",
+                                                backgroundColor: "rgba(24, 173, 33, 0.3)",
+                                                pointRadius: 0,
+                                                borderWidth: 0
+                                            }, {
+                                                label: $('#friend').val(),
+                                                borderColor: "rgba(0, 0, 0, 0)",
+                                                backgroundColor: "rgba(238, 100, 146, 0.3)",
+                                                data: fAcceptedNum,
+                                                pointRadius: 0,
+                                                borderWidth: 0
+                                            }]
+                                        },
+                                        options: {
+                                            tooltips: {
+                                                intersect: false,
+                                                mode: "index",
+                                                callbacks: {
+                                                    footer: function (tooltipItems, data) {
+                                                        var diff = data.datasets[0].data[tooltipItems[0].index] - data.datasets[1].data[tooltipItems[1].index];
+                                                        return '차이: ' + diff;
+                                                    }
+                                                },
+                                                footerFontStyle: 'normal'
+                                            },
+                                            elements: {
+                                                line: {
+                                                    tension: 0
+                                                }
+                                            }
+                                        }
+                                    };
+                                    accChart.destroy();
+                                    accChart = new Chart(accCtx, accConfig);
+                                },
+                                error: function () {
+
+                                }
+                            })
+                        }
+                    });
                 {% endif %}
             })
         </script>
@@ -422,9 +518,17 @@
                 </ul>
             </li>
         </ul>
-
         <h4 class="scrollspy" style="margin-top: 56px;" id="accepted-chart">Accepted! History</h4>
         {% if accepted_submissions | length %}
+            <div class="row">
+                <div class="input-field col s4">
+                    <input type="text" name="friend_id" id="friend" class="autocomplete">
+                    <label for="friend">친구와 비교해보세요!</label>
+                </div>
+                <div class="col s4 grey-text tooltipped" style="margin-top: 26px; cursor: pointer" data-position="top"
+                     data-tooltip="친구가 이전에 전적검색을 한적이 있는 경우에만 비교가 가능합니다. 아직 엔터가 안먹어요ㅠ 자동완성에서 선택해주세요">검색이 안되시나요?
+                </div>
+            </div>
             <div class="chart-container" style="position: relative; width:100%;">
                 <canvas id="chart-accepted"></canvas>
             </div>
@@ -465,13 +569,13 @@
         {% else %}
             20문제 이상 푸셔야 그래프를 볼 수 있습니다.
         {% endif %}
-    <div class="hide-on-med-and-down" style="position: fixed; top: 62px; left: 0">
-      <ul class="section table-of-contents">
-        <li><a href="#recent-chart">최근 2주일 제출 통계</a></li>
-        <li><a href="#accepted-chart">Accepted! History</a></li>
-        <li><a href="#punch-card">Punch Card</a></li>
-        <li><a href="#ranking-chart">Ranking History</a></li>
-      </ul>
-    </div>
+        <div class="hide-on-med-and-down" style="position: fixed; top: 62px; left: 0">
+            <ul class="section table-of-contents">
+                <li><a href="#recent-chart">최근 2주일 제출 통계</a></li>
+                <li><a href="#accepted-chart">Accepted! History</a></li>
+                <li><a href="#punch-card">Punch Card</a></li>
+                <li><a href="#ranking-chart">Ranking History</a></li>
+            </ul>
+        </div>
     {% endif %}
 {% endblock %}

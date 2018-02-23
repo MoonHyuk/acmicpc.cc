@@ -6,9 +6,10 @@ from multiprocessing import Process
 import urllib.request
 
 from bs4 import BeautifulSoup
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sslify import SSLify
+import requests
 
 from models import db
 from models import User, Submission, AcceptedSubmission, Ranking
@@ -238,7 +239,7 @@ def update_accepted(index=0, batch_num=10):
         print("Process {0} is done".format(proc))
 
 
-def schedule_accpeted():
+def schedule_accepted():
     with application.app_context():
         BATCH_NUM = 4
         procs = []
@@ -250,22 +251,22 @@ def schedule_accpeted():
 
         for proc in procs:
             proc.join()
+    return "OK"
 
 
 def request_koo_api(api, data):
-     req = urllib.request.Request("https://koosa.ga/api/" + api, data = json.dumps(data).encode("utf-8"), headers = hds_json)
-     fp = urllib.request.urlopen(req)
-     source = fp.read()
-     fp.close()
-     return json.loads(source.decode("utf-8"))["result"]
+    req = urllib.request.Request("https://koosa.ga/api/" + api, data=json.dumps(data).encode("utf-8"), headers=hds_json)
+    fp = urllib.request.urlopen(req)
+    source = fp.read()
+    fp.close()
+    return json.loads(source.decode("utf-8"))["result"]
 
 
-def update_rank():
+def update_rank(event, context):
     with application.app_context():
+        my_kwargs = event.get("kwargs")
         date = datetime.datetime.utcnow().strftime('%Y/%m/%d')
-        i = 1
-        run = True
-        while run:
+        for i in range(my_kwargs["start"], my_kwargs["end"]):
             url = "https://www.acmicpc.net/ranklist/" + str(i)
             soup = get_soup_from_url(url)
             table = soup.find(id='ranklist')
@@ -274,8 +275,7 @@ def update_rank():
             boj_ranks = list()
             for tr in trs:
                 tds = tr.find_all('td')
-                if tds[3].a.string.strip() == '19':
-                    run = False
+                if int(tds[3].a.string.strip()) <= 19:
                     break
                 boj_ids.append(''.join(tds[1].find_all(text=True, recursive=True)).strip())
                 boj_ranks.append(int(tds[0].string))
@@ -301,14 +301,17 @@ def update_rank():
                     user.first().ranking = new_ranking
                     db.session.commit()
 
-
                 print("{0} {1} {2}".format(boj_id, boj_rank, koo_rank))
-            i += 1
+    return "OK"
 
 
 @application.route('/')
 def render_index():
-    return render_template("index.html")
+    user = [i.boj_id for i in User.query.order_by(User.update_time).all()][::-1]
+    user_dict = OrderedDict()
+    for i in user:
+        user_dict[i] = None
+    return render_template("index.html", user = json.dumps(user_dict))
 
 
 @application.route('/user')
@@ -318,6 +321,7 @@ def get_user():
     ranking_date = []
     boj_rank = []
     koo_rank = []
+    user_dict = []
     user_id = request.args.get("id")
     acc_user_id = is_boj_user(user_id)
     if acc_user_id:
@@ -345,9 +349,22 @@ def get_user():
             boj_rank = [i[0] for i in ranking_values]
             koo_rank = [i[1] for i in ranking_values]
 
+        user_ids = [i.boj_id for i in User.query.order_by(User.update_time).all()][::-1]
+        user_dict = OrderedDict()
+        for i in user_ids:
+            user_dict[i] = None
+
     return render_template("user.html", user=user, updated=updated, submissions=submissions,
-                           accepted_submissions=accepted_submissions, ranking_date = ranking_date,
-                           boj_rank=boj_rank, koo_rank=koo_rank)
+                           accepted_submissions=accepted_submissions, ranking_date=ranking_date,
+                           boj_rank=boj_rank, koo_rank=koo_rank, user_ids=json.dumps(user_dict))
+
+
+@application.route('/_get_friend_data')
+def get_friend_data():
+    friend_id = request.args.get("friend_id")
+    friend_accepted = AcceptedSubmission.query.filter_by(boj_id=friend_id).order_by(AcceptedSubmission.datetime).all()
+    ret = [d.__dict__['datetime'].strftime("%Y-%m-%d") for d in friend_accepted]
+    return jsonify(ret=ret)
 
 
 @application.route('/update_user')
