@@ -36,7 +36,7 @@ def is_boj_user(user_id):
     url = "https://www.acmicpc.net/user/" + user_id
     try:
         req = urllib.request.Request(url, headers=hds)
-        urllib.request.urlopen(req)
+        urllib.request.urlopen(req, timeout=5)
     except urllib.error.HTTPError:
         return False
     except UnicodeEncodeError:
@@ -48,7 +48,13 @@ def is_boj_user(user_id):
 
 def get_soup_from_url(url):
     req = urllib.request.Request(url, headers=hds)
-    fp = urllib.request.urlopen(req)
+    temp = 0
+    while temp < 10:
+        try:
+            fp = urllib.request.urlopen(req, timeout=10)
+            break
+        except:
+            temp += 1
     source = fp.read()
     fp.close()
     return BeautifulSoup(source, "lxml")
@@ -140,7 +146,7 @@ def update_submission(user_id):
 
 def update_accepted(index=0, batch_num=10):
     with application.app_context():
-        users = User.query.order_by(User.id).all()
+        users = User.query.order_by(-User.id).all()
         count = User.query.count()
         size = count // batch_num
         proc = os.getpid()
@@ -234,7 +240,7 @@ def update_accepted(index=0, batch_num=10):
 
 def schedule_accpeted():
     with application.app_context():
-        BATCH_NUM = 1
+        BATCH_NUM = 4
         procs = []
 
         for index in range(BATCH_NUM):
@@ -349,7 +355,7 @@ def update_user():
     if request.is_xhr:
         user_id = request.args.get('id')
         update_profile(user_id)
-        return "OK"
+        return "OK" 
     else:
         abort(404)
 
@@ -366,4 +372,4 @@ def statistics():
 
 
 if __name__ == "__main__":
-    application.run()
+    application.run(use_reloader=False)

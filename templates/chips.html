@@ -30,6 +30,8 @@
     <div class="chip animated fadeIn purple darken-1 white-text">3000문제 돌파!!!</div>
 {% elif user.solved_num >= 4000 and user.solved_num < 5000 %}
     <div class="chip animated fadeIn purple darken-4 white-text">4000문제 돌파!!!!</div>
+{% elif user.solved_num >= 5000 and user.solved_num < 6000 %}
+    <div class="chip animated fadeIn white-text rainbow">5000문제 돌파</div>
 {% endif %}
 {% if not submissions | length %}
     <div class="chip animated fadeIn grey darken-4 white-text">백준을 떠난</div>
