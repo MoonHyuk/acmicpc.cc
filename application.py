@@ -79,7 +79,7 @@ def update_profile(user_id):
 
 
 def update_submission(user_id):
-    soup = get_soup_from_url("https://www.acmicpc.net/status/?user_id=" + user_id)
+    soup = get_soup_from_url("https://www.acmicpc.net/status?user_id=" + user_id)
     table = soup.find(id="status-table")
     trs = table.tbody.find_all('tr')
 
@@ -137,7 +137,7 @@ def update_submission(user_id):
 
         # Load next submission page
         if tr == trs[-1]:
-            soup = get_soup_from_url("https://www.acmicpc.net/status/?user_id=" + user_id + "&top=" + str(submit_id))
+            soup = get_soup_from_url("https://www.acmicpc.net/status?user_id=" + user_id + "&top=" + str(submit_id))
             table = soup.find(id="status-table")
             trs = table.tbody.find_all('tr')
             i = 0
@@ -157,7 +157,7 @@ def update_accepted(index=0, batch_num=10):
         for user in users[start:end]:
             user_id = user.boj_id
             print("user {0} start by: {1}".format(user_id, proc))
-            url = "https://www.acmicpc.net/status/?user_id=" + user_id + "&result_id=4"
+            url = "https://www.acmicpc.net/status?user_id=" + user_id + "&result_id=4"
             soup = get_soup_from_url(url)
             table = soup.find(id="status-table")
             trs = table.tbody.find_all('tr')
@@ -228,7 +228,7 @@ def update_accepted(index=0, batch_num=10):
                 # Load next submission page
                 if tr == trs[-1]:
                     soup = get_soup_from_url(
-                        "https://www.acmicpc.net/status/?user_id=" + user_id + "&result_id=4&top=" + str(submit_id))
+                        "https://www.acmicpc.net/status?user_id=" + user_id + "&result_id=4&top=" + str(submit_id))
                     table = soup.find(id="status-table")
                     trs = table.tbody.find_all('tr')
                     i = 0
